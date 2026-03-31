@@ -13,7 +13,7 @@ const TeacherDashboard = () => {
                         <span className="navbar-brand mb-0 h1">SmartRoll</span>
                         <span className="navbar-text mx-auto">Teacher Dashboard</span>
                         <div className="d-flex">
-                            <Link to="/login" className="btn btn-outline-primary">
+                            <Link to="/teacher-login" className="btn btn-outline-primary">
                                 <i className="bi bi-box-arrow-right"></i> Logout
                             </Link>
                         </div>

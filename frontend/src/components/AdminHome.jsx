@@ -8,6 +8,10 @@ const AdminHome = () => {
         subjects: 0,
         classes: 0
     });
+    const [recentSchedules, setRecentSchedules] = useState([]);
+    const [classes, setClasses] = useState([]);
+    const [subjects, setSubjects] = useState([]);
+    const [teachers, setTeachers] = useState([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
 
@@ -21,12 +25,17 @@ const AdminHome = () => {
 
     const fetchCounts = async () => {
         try {
-            const [studentsRes, teachersRes, subjectsRes, classesRes] = await Promise.all([
+            const [studentsRes, teachersRes, subjectsRes, classesRes, schedulesRes, classesAllRes, subjectsAllRes, teachersAllRes] = await Promise.all([
                 fetch(`${API_BASE}/students/count`, { headers: AUTH_HEADER, credentials: 'include' }),
                 fetch(`${API_BASE}/teachers/count`, { headers: AUTH_HEADER, credentials: 'include' }),
                 fetch(`${API_BASE}/subjects/count`, { headers: AUTH_HEADER, credentials: 'include' }),
-                fetch(`${API_BASE}/classes/count`, { headers: AUTH_HEADER, credentials: 'include' })
+                fetch(`${API_BASE}/classes/count`, { headers: AUTH_HEADER, credentials: 'include' }),
+                fetch(`${API_BASE}/schedules`, { headers: AUTH_HEADER, credentials: 'include' }),
+                fetch(`${API_BASE}/classes`, { headers: AUTH_HEADER, credentials: 'include' }),
+                fetch(`${API_BASE}/subjects`, { headers: AUTH_HEADER, credentials: 'include' }),
+                fetch(`${API_BASE}/teachers`, { headers: AUTH_HEADER, credentials: 'include' })
             ]);
+
 
             if (!studentsRes.ok || !teachersRes.ok || !subjectsRes.ok || !classesRes.ok) {
                 throw new Error('Failed to fetch counts');
@@ -36,6 +45,16 @@ const AdminHome = () => {
             const teachersCount = await teachersRes.json();
             const subjectsCount = await subjectsRes.json();
             const classesCount = await classesRes.json();
+            const schedulesData = await schedulesRes.json();
+            const classesData = await classesAllRes.json();
+            const subjectsData = await subjectsAllRes.json();
+            const teachersData = await teachersAllRes.json();
+            const recentSchedules = schedulesData.slice(-3); // Last 3 schedules
+
+            setRecentSchedules(recentSchedules);
+            setClasses(classesData);
+            setSubjects(subjectsData);
+            setTeachers(teachersData);
 
             setCounts({
                 students: studentsCount,
@@ -43,6 +62,7 @@ const AdminHome = () => {
                 subjects: subjectsCount,
                 classes: classesCount
             });
+
         } catch (err) {
             setError(err.message);
         } finally {
@@ -130,10 +150,24 @@ const AdminHome = () => {
                 <div className="col-md-6">
                     <h3>Recent Activities</h3>
                     <ul className="list-group">
-                        <li className="list-group-item">• Teacher Asha assigned to Class A (IT)</li>
-                        <li className="list-group-item">• Subject "AI" added</li>
-                        <li className="list-group-item">• New student Ravi enrolled</li>
+                        {recentSchedules.length > 0 ? (
+                            recentSchedules.map((schedule, index) => {
+                                const cls = classes.find(c => c.id === schedule.classId);
+                                const teacher = teachers.find(t => t.id === schedule.teacherId);
+                                const className = cls ? cls.className : schedule.classId;
+                                const teacherName = teacher ? `${teacher.firstName} ${teacher.lastName}` : schedule.teacherId;
+                                return (
+                                    <li key={index} className="list-group-item">
+                                        • Schedule created: {className} - {teacherName} ({new Date(schedule.startTime).toLocaleDateString()})
+                                    </li>
+                                );
+                            })
+                        ) : (
+                            <li className="list-group-item text-muted">No recent schedules</li>
+                        )}
+
                     </ul>
+
                 </div>
 
                 {/* System Status */}

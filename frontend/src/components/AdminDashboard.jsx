@@ -1,3 +1,4 @@
+
 import React from 'react';
 import { Outlet, Link } from 'react-router-dom';
 import 'bootstrap/dist/css/bootstrap.min.css';
@@ -13,7 +14,7 @@ function AdminDashboard() {
                     <div className="container-fluid">
                         <span className="navbar-brand mb-0 h1">SmartRoll</span>
                         <div className="d-flex">
-                            <Link to="/login" className="btn btn-outline-primary">
+                            <Link to="/admin-login" className="btn btn-outline-primary">
                                 <i className="bi bi-box-arrow-right"></i> Logout
                             </Link>
                         </div>
