@@ -1,0 +1,18 @@
+/* Footer.css - Simple Bootstrap-based design for Footer component */
+
+footer {
+    background-color: #f8f9fa;
+    border-top: 1px solid #dee2e6;
+    margin-top: auto;
+}
+
+footer .container {
+    padding: 1rem 0;
+}
+
+footer p {
+    margin-bottom: 0;
+    color: #6c757d;
+    font-size: 0.9rem;
+    text-align: center;
+}
