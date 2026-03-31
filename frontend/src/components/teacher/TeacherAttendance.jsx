@@ -200,6 +200,50 @@ const TeacherAttendance = () => {
         const currentDate = new Date().toISOString().split('T')[0]; // YYYY-MM-DD format
 
         try {
+            // Validate attendance data before sending
+            if (!students || students.length === 0) {
+                setError('No students found. Cannot save attendance.');
+                setSaving(false);
+                return;
+            }
+
+            if (!attendance || Object.keys(attendance).length === 0) {
+                setError('Attendance data is empty. Please select attendance status.');
+                setSaving(false);
+                return;
+            }
+
+            // Check if attendance already exists for this date and class
+            const checkExists = await fetch(`/api/attendance/class/${parseInt(selectedClass)}?date=${currentDate}`, {
+                method: 'GET',
+                credentials: 'include',
+                headers: {
+                    'Authorization': `Bearer ${localStorage.getItem('token')}`,
+                    'Content-Type': 'application/json',
+                }
+            });
+
+            let existingAttendance = [];
+            if (checkExists.ok) {
+                existingAttendance = await checkExists.json();
+                existingAttendance = Array.isArray(existingAttendance) ? existingAttendance : [];
+            }
+
+            // Separate students into new and existing
+            const newStudents = students.filter(s => !existingAttendance.some(a => a.studentId === s.id));
+            const existingStudents = students.filter(s => existingAttendance.some(a => a.studentId === s.id));
+
+            if (existingStudents.length > 0) {
+                const proceed = window.confirm(
+                    `Attendance already marked for ${existingStudents.length} student(s) on this date.\n\n` +
+                    `Proceed to update? This will replace previous records.`
+                );
+                if (!proceed) {
+                    setSaving(false);
+                    return;
+                }
+            }
+
             // Send attendance for each student
             const promises = students.map(student => {
                 const attendanceData = {
@@ -210,6 +254,8 @@ const TeacherAttendance = () => {
                     scheduleId: scheduleId
                 };
 
+                console.log('Sending attendance:', attendanceData);
+
                 return fetch('/api/attendance/mark', {
                     method: 'POST',
                     credentials: 'include',
@@ -218,14 +264,99 @@ const TeacherAttendance = () => {
                         'Content-Type': 'application/json',
                     },
                     body: JSON.stringify(attendanceData)
-                });
+                }).catch(err => ({ ok: false, status: 500, statusText: err.message }));
             });
 
             const responses = await Promise.all(promises);
-            const failedResponses = responses.filter(res => !res.ok);
+            const failedResponses = [];
+            const successCount = responses.filter(r => r.ok).length;
+
+            for (let i = 0; i < responses.length; i++) {
+                if (!responses[i].ok) {
+                    let errorText = 'Unknown error';
+                    if (responses[i].status === 400) {
+                        errorText = 'Already marked (trying to update)';
+                    } else {
+                        try {
+                            errorText = await responses[i].text();
+                        } catch (e) {
+                            errorText = responses[i].statusText || 'Request failed';
+                        }
+                    }
+                    console.error(`Failed to save attendance for student ${students[i].id}:`, responses[i].status, errorText);
+                    failedResponses.push({ student: students[i], status: responses[i].status, error: errorText });
+                }
+            }
 
             if (failedResponses.length > 0) {
-                setError(`Failed to save attendance for ${failedResponses.length} student(s). Please try again.`);
+                // Filter out 400 errors (already marked) and delete old records first
+                const needsUpdate = failedResponses.filter(f => f.status === 400);
+
+                if (needsUpdate.length > 0) {
+                    console.log('Deleting existing attendance records before re-marking...');
+
+                    // Delete existing records
+                    const deletePromises = needsUpdate.map(failed => {
+                        const existingRecord = existingAttendance.find(a => a.studentId === failed.student.id);
+                        if (existingRecord && existingRecord.attendanceId) {
+                            return fetch(`/api/attendance/${existingRecord.attendanceId}`, {
+                                method: 'DELETE',
+                                credentials: 'include',
+                                headers: {
+                                    'Authorization': `Bearer ${localStorage.getItem('token')}`,
+                                    'Content-Type': 'application/json',
+                                }
+                            }).catch(err => ({ ok: false, status: 500, statusText: err.message }));
+                        }
+                        return Promise.resolve({ ok: false, status: 404 });
+                    });
+
+                    const deleteResponses = await Promise.all(deletePromises);
+                    const deleteSuccessCount = deleteResponses.filter(r => r.ok).length;
+
+                    console.log(`Deleted ${deleteSuccessCount}/${needsUpdate.length} existing records`);
+
+                    if (deleteSuccessCount > 0) {
+                        // Now retry POST for the deleted records
+                        const retryPromises = needsUpdate.map(failed => {
+                            const student = failed.student;
+                            const attendanceData = {
+                                studentId: student.id,
+                                classId: parseInt(selectedClass),
+                                date: currentDate,
+                                status: attendance[student.id] === 'Present' ? 'PRESENT' : 'ABSENT',
+                                scheduleId: scheduleId
+                            };
+
+                            return fetch('/api/attendance/mark', {
+                                method: 'POST',
+                                credentials: 'include',
+                                headers: {
+                                    'Authorization': `Bearer ${localStorage.getItem('token')}`,
+                                    'Content-Type': 'application/json',
+                                },
+                                body: JSON.stringify(attendanceData)
+                            }).catch(err => ({ ok: false, status: 500, statusText: err.message }));
+                        });
+
+                        const retryResponses = await Promise.all(retryPromises);
+                        const retrySuccessCount = retryResponses.filter(r => r.ok).length;
+                        const totalSuccess = successCount + retrySuccessCount;
+
+                        if (retrySuccessCount > 0) {
+                            setSavedInfo({
+                                scheduleId: scheduleId,
+                                date: currentDate,
+                                classId: selectedClass
+                            });
+                            alert(`Attendance updated: ${totalSuccess}/${students.length} students`);
+                            return;
+                        }
+                    }
+                }
+
+                const errorMsg = failedResponses.map(f => `Student ${f.student.id}: ${f.status}`).join(', ');
+                setError(`Failed to save attendance: ${errorMsg}`);
             } else {
                 // Store the saved info for the report link
                 setSavedInfo({
@@ -236,7 +367,8 @@ const TeacherAttendance = () => {
                 alert('Attendance saved successfully!');
             }
         } catch (err) {
-            setError('Error saving attendance. Please try again.');
+            console.error('Error:', err);
+            setError('Error saving attendance. Please try again. ' + err.message);
         } finally {
             setSaving(false);
         }

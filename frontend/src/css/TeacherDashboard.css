@@ -1,0 +1,284 @@
+/* ================= GLOBAL ================= */
+body {
+    font-family: 'Poppins', sans-serif;
+    background: #f4f6fb;
+    margin: 0;
+}
+
+/* ================= DASHBOARD LAYOUT ================= */
+
+.teacher-dashboard {
+    min-height: 100vh;
+}
+
+/* ================= HEADER ================= */
+
+.teacher-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+
+    background: #ffffff;              /* Light background */
+    padding: 15px 25px;
+
+    border-bottom: 1px solid #e5e7eb; /* subtle border */
+    box-shadow: 0 2px 6px rgba(0,0,0,0.05); /* soft shadow */
+
+    color: #333;
+}
+
+.teacher-header h4 {
+    margin: 0;
+    font-weight: 600;
+    color: #4e73df;   /* soft blue highlight */
+}
+
+.teacher-header .dashboard-title {
+    font-size: 18px;
+    font-weight: 500;
+    color: #555;
+}
+
+/* Left */
+.header-left .logo {
+    font-size: 22px;
+    font-weight: 700;
+    margin: 0;
+}
+
+/* Center */
+.header-center {
+    text-align: center;
+    flex: 1;
+}
+
+.header-center h5 {
+    margin: 0;
+    font-weight: 500;
+    letter-spacing: 1px;
+}
+
+/* Right */
+.header-right {
+    display: flex;
+    align-items: center;
+}
+
+/* Logout Button */
+.logout-btn {
+    background: #f1f5ff;
+    border: 1px solid #4e73df;
+    color: #4e73df;
+    padding: 6px 14px;
+    border-radius: 8px;
+    font-size: 14px;
+    transition: 0.3s;
+}
+
+.logout-btn:hover {
+    background: #4e73df;
+    color: white;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+    .header-center {
+        display: none;
+    }
+}
+/* LOGOUT BUTTON */
+.teacher-dashboard .btn-outline-primary {
+    border-color: white;
+    color: white;
+}
+
+.teacher-dashboard .btn-outline-primary:hover {
+    background: white;
+    color: #4e73df;
+}
+
+/* ================= SIDEBAR ================= */
+
+.sidebar {
+    height: 100vh;
+    background: linear-gradient(180deg, #1e2a78, #4e73df);
+    padding-top: 20px;
+    position: sticky;
+    top: 0;
+}
+
+.sidebar .nav-link {
+    color: #cfd8ff;
+    padding: 12px 20px;
+    margin: 5px 10px;
+    border-radius: 10px;
+    transition: 0.3s;
+    font-size: 15px;
+}
+
+.sidebar .nav-link:hover {
+    background: rgba(255,255,255,0.15);
+    color: white;
+    transform: translateX(5px);
+}
+
+.sidebar .nav-link.active {
+    background: white;
+    color: #4e73df;
+    font-weight: 600;
+}
+
+.sidebar i {
+    margin-right: 10px;
+}
+
+/* ================= MAIN CONTENT ================= */
+
+main {
+    padding: 20px;
+}
+
+/* ================= DASHBOARD HOME ================= */
+
+.dashboard-home {
+    background: linear-gradient(135deg, #eef2ff, #f9faff);
+    min-height: 100vh;
+}
+
+/* LOADER */
+.loader-container {
+    height: 80vh;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+/* ================= SUMMARY CARDS ================= */
+
+.dashboard-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+    gap: 20px;
+}
+
+.dashboard-card {
+    padding: 20px;
+    border-radius: 15px;
+    color: white;
+    transition: 0.3s;
+    box-shadow: 0 6px 15px rgba(0,0,0,0.1);
+}
+
+.dashboard-card h6 {
+    font-size: 14px;
+    opacity: 0.9;
+}
+
+.dashboard-card h2 {
+    margin-top: 10px;
+    font-weight: bold;
+}
+
+.dashboard-card:hover {
+    transform: translateY(-6px);
+    box-shadow: 0 10px 25px rgba(0,0,0,0.2);
+}
+
+/* CARD COLORS */
+.gradient-blue { background: linear-gradient(135deg,#4e73df,#224abe); }
+.gradient-green { background: linear-gradient(135deg,#1cc88a,#17a673); }
+.gradient-purple { background: linear-gradient(135deg,#6f42c1,#4e2ea7); }
+.gradient-orange { background: linear-gradient(135deg,#f6c23e,#dda20a); }
+.gradient-red { background: linear-gradient(135deg,#e74a3b,#c0392b); }
+.gradient-dark { background: linear-gradient(135deg,#343a40,#23272b); }
+
+/* ================= GLASS CARDS ================= */
+
+.glass-card {
+    background: rgba(255,255,255,0.75);
+    backdrop-filter: blur(12px);
+    border-radius: 15px;
+    padding: 20px;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+    transition: 0.3s;
+}
+
+.glass-card:hover {
+    transform: translateY(-3px);
+}
+
+/* ================= CHART ================= */
+
+.chart-box {
+    height: 300px;
+}
+
+/* ================= TABLE ================= */
+
+.custom-table {
+    border-radius: 10px;
+    overflow: hidden;
+}
+
+.custom-table thead {
+    background: #4e73df;
+    color: white;
+}
+
+.custom-table tbody tr:hover {
+    background: #f1f3ff;
+}
+
+/* ================= TODAY CLASS ================= */
+
+.glass-card p {
+    margin: 6px 0;
+}
+
+/* ================= LEAVE REQUEST ================= */
+
+.leave-box {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    background: #f8f9ff;
+    padding: 10px;
+    border-radius: 10px;
+    margin-bottom: 10px;
+}
+
+/* ================= QUICK ACTION ================= */
+
+.quick-actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+}
+
+.quick-actions .btn {
+    border-radius: 20px;
+    padding: 8px 15px;
+    font-size: 14px;
+}
+
+/* ================= BUTTON HOVER ================= */
+
+.btn {
+    transition: 0.3s;
+}
+
+.btn:hover {
+    transform: scale(1.05);
+}
+
+/* ================= RESPONSIVE ================= */
+
+@media (max-width: 768px) {
+    .sidebar {
+        display: none;
+    }
+
+    .dashboard-grid {
+        grid-template-columns: 1fr;
+    }
+}

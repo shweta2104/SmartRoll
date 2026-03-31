@@ -1,7 +1,6 @@
 import React, { useState, useEffect } from 'react';
-import axios from 'axios';
 import { useNavigate } from 'react-router-dom';
-import 'bootstrap/dist/css/bootstrap.min.css';
+import '../css/Register.css';
 
 function TeacherRegistration() {
     const [formData, setFormData] = useState({
@@ -10,6 +9,8 @@ function TeacherRegistration() {
         confirmPassword: ''
     });
     const [error, setError] = useState('');
+    const [showPassword, setShowPassword] = useState(false);
+    const [showConfirmPassword, setShowConfirmPassword] = useState(false);
     const [success, setSuccess] = useState('');
     const [loading, setLoading] = useState(false);
     const [redirecting, setRedirecting] = useState(false);
@@ -21,7 +22,6 @@ function TeacherRegistration() {
         if (token && role === 'STUDENT') {
             setRedirecting(true);
             setTimeout(() => navigate('/login'), 1500);
-            return;
         }
     }, [navigate]);
 
@@ -56,14 +56,15 @@ function TeacherRegistration() {
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify(formData)
             });
-            const responseData = await response.json();
-            setSuccess(responseData.message || responseData);
+            const data = await response.json();
+            setSuccess(data.message || "Registered successfully");
+
             setTimeout(() => {
                 navigate('/teacher-login');
             }, 2000);
+
         } catch (error) {
-            console.error('Registration error:', error);
-            setError(error.response?.data?.error || error.response?.data || error.message || 'Registration failed. Please try again.');
+            setError('Registration failed. Try again.');
         } finally {
             setLoading(false);
         }
@@ -73,73 +74,99 @@ function TeacherRegistration() {
         return (
             <div className="container mt-5 text-center">
                 <div className="alert alert-warning">
-                    <h4>Access Denied</h4>
-                    <p>Students cannot access teacher registration. Redirecting to login...</p>
+                    Students cannot access this page.
                 </div>
             </div>
         );
     }
 
     return (
-        <div className="container mt-5">
-            <div className="row justify-content-center">
-                <div className="col-md-6">
-                    <div className="card">
-                        <div className="card-header">
-                            <h3>Teacher Registration</h3>
-                            <p className="mb-0 text-danger fw-bold small">Admin-approved teachers only</p>
-                            <p className="mb-0">Enter your admin-provided email and create password</p>
+        <div className="register-wrapper">
+
+            {/* LEFT */}
+            <div className="register-left">
+                <h1>SmartRoll</h1>
+                <p>Teacher Registration</p>
+                <span>Create your account using admin email</span>
+            </div>
+
+            {/* RIGHT */}
+            <div className="register-right">
+
+                <div className="register-card">
+
+                    <h2>Register</h2>
+
+                    {error && <div className="alert alert-danger">{error}</div>}
+                    {success && <div className="alert alert-success">{success}</div>}
+
+                    <form onSubmit={handleSubmit}>
+
+                        {/* Email */}
+                        <div className="input-box">
+                            <input
+                                type="email"
+                                name="email"
+                                placeholder=" "
+                                value={formData.email}
+                                onChange={handleChange}
+                                required
+                            />
+                            <label>Email</label>
                         </div>
-                        <div className="card-body">
-                            {error && <div className="alert alert-danger">{error}</div>}
-                            {success && <div className="alert alert-success">{success}</div>}
-                            <form onSubmit={handleSubmit}>
-                                <div className="mb-3">
-                                    <label htmlFor="email" className="form-label">Email (provided by admin)</label>
-                                    <input
-                                        type="email"
-                                        className="form-control"
-                                        id="email"
-                                        name="email"
-                                        value={formData.email}
-                                        onChange={handleChange}
-                                        required
-                                    />
-                                </div>
-                                <div className="mb-3">
-                                    <label htmlFor="password" className="form-label">Password</label>
-                                    <input
-                                        type="password"
-                                        className="form-control"
-                                        id="password"
-                                        name="password"
-                                        value={formData.password}
-                                        onChange={handleChange}
-                                        required
-                                    />
-                                </div>
-                                <div className="mb-3">
-                                    <label htmlFor="confirmPassword" className="form-label">Confirm Password</label>
-                                    <input
-                                        type="password"
-                                        className="form-control"
-                                        id="confirmPassword"
-                                        name="confirmPassword"
-                                        value={formData.confirmPassword}
-                                        onChange={handleChange}
-                                        required
-                                    />
-                                </div>
-                                <button type="submit" className="btn btn-primary w-100" disabled={loading}>
-                                    {loading ? 'Registering...' : 'Register'}
-                                </button>
-                            </form>
-                            <div className="text-center mt-3">
-                                <a href="/teacher/email-lookup" className="btn btn-link me-3">Forgot your email?</a>
-                                <button className="btn btn-link" onClick={() => navigate('/teacher-login')}>Already have account? Login</button>
-                            </div>
+
+                        {/* Password */}
+                        <div className="input-box">
+                            <input
+                                type={showPassword ? 'text' : 'password'}
+                                name="password"
+                                placeholder=" "
+                                value={formData.password}
+                                onChange={handleChange}
+                                required
+                            />
+                            <label>Password</label>
+
+                            <span
+                                className="toggle-eye"
+                                onClick={() => setShowPassword(!showPassword)}
+                            >
+                                {showPassword ? '🙈' : '👁'}
+                            </span>
                         </div>
-                    </div>
+
+                        {/* Confirm Password */}
+                        <div className="input-box">
+                            <input
+                                type={showConfirmPassword ? 'text' : 'password'}
+                                name="confirmPassword"
+                                placeholder=" "
+                                value={formData.confirmPassword}
+                                onChange={handleChange}
+                                required
+                            />
+                            <label>Confirm Password</label>
+
+                            <span
+                                className="toggle-eye"
+                                onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+                            >
+                                {showConfirmPassword ? '🙈' : '👁'}
+                            </span>
+                        </div>
+
+                        <button className="register-btn" disabled={loading}>
+                            {loading ? "Registering..." : "Register"}
+                        </button>
+
+                        <div className="register-links">
+                            <a href="/teacher/email-lookup">Forgot Email?</a>
+                            <span onClick={() => navigate('/teacher-login')}>
+                                Login
+                            </span>
+                        </div>
+
+                    </form>
                 </div>
             </div>
         </div>
@@ -147,4 +174,3 @@ function TeacherRegistration() {
 }
 
 export default TeacherRegistration;
-

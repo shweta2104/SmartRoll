@@ -19,6 +19,9 @@ function Schedules() {
     const [error, setError] = useState('');
     const [success, setSuccess] = useState('');
 
+    const userRole = localStorage.getItem('userRole') || localStorage.getItem('role') || '';
+    const isAdmin = userRole === 'ADMIN';
+
     useEffect(() => {
         fetchSchedules();
         fetchClasses();
@@ -115,6 +118,11 @@ function Schedules() {
         setError('');
         setSuccess('');
 
+        if (!isAdmin) {
+            setError('Access denied: only admin can create schedules.');
+            return;
+        }
+
         // Validate dates
         const startDateTime = new Date(formData.startTime + ':00');
         const endDateTime = new Date(formData.endTime + ':00');
@@ -153,115 +161,122 @@ function Schedules() {
 
     return (
         <div className="container mt-4">
+            {!isAdmin && (
+                <div className="alert alert-warning mb-4">
+                    <strong>Access Denied:</strong> Only admin users can create schedules. Please log in as an admin to access this feature.
+                </div>
+            )}
             <h2>Create Schedule</h2>
             {error && <div className="alert alert-danger">{error}</div>}
             {success && <div className="alert alert-success">{success}</div>}
-            <form onSubmit={handleSubmit} className="mb-4">
-                <div className="row">
-                    <div className="col-md-6">
-                        <div className="mb-3">
-                            <label htmlFor="classId" className="form-label">Class</label>
-                            <select
-                                className="form-select"
-                                id="classId"
-                                name="classId"
-                                value={formData.classId}
-                                onChange={handleChange}
-                                required
-                            >
-                                <option value="">Select Class</option>
-                                {classes.map(cls => (
-                                    <option key={cls.id} value={cls.id}>{cls.className}</option>
-                                ))}
-                            </select>
+            {isAdmin ? (
+                <form onSubmit={handleSubmit} className="mb-4">
+                    <div className="row">
+                        <div className="col-md-6">
+                            <div className="mb-3">
+                                <label htmlFor="classId" className="form-label">Class</label>
+                                <select
+                                    className="form-select"
+                                    id="classId"
+                                    name="classId"
+                                    value={formData.classId}
+                                    onChange={handleChange}
+                                    required
+                                >
+                                    <option value="">Select Class</option>
+                                    {classes.map(cls => (
+                                        <option key={cls.id} value={cls.id}>{cls.className}</option>
+                                    ))}
+                                </select>
+                            </div>
+                        </div>
+                        <div className="col-md-6">
+                            <div className="mb-3">
+                                <label htmlFor="subjectId" className="form-label">Subject</label>
+                                <select
+                                    className="form-select"
+                                    id="subjectId"
+                                    name="subjectId"
+                                    value={formData.subjectId}
+                                    onChange={handleChange}
+                                    required
+                                >
+                                    <option value="">Select Subject</option>
+                                    {subjects.map(subject => (
+                                        <option key={subject.id} value={subject.id}>{subject.name}</option>
+                                    ))}
+                                </select>
+                            </div>
                         </div>
                     </div>
-                    <div className="col-md-6">
-                        <div className="mb-3">
-                            <label htmlFor="subjectId" className="form-label">Subject</label>
-                            <select
-                                className="form-select"
-                                id="subjectId"
-                                name="subjectId"
-                                value={formData.subjectId}
-                                onChange={handleChange}
-                                required
-                            >
-                                <option value="">Select Subject</option>
-                                {subjects.map(subject => (
-                                    <option key={subject.id} value={subject.id}>{subject.name}</option>
-                                ))}
-                            </select>
+                    <div className="row">
+                        <div className="col-md-6">
+                            <div className="mb-3">
+                                <label htmlFor="teacherId" className="form-label">Teacher</label>
+                                <select
+                                    className="form-select"
+                                    id="teacherId"
+                                    name="teacherId"
+                                    value={formData.teacherId}
+                                    onChange={handleChange}
+                                    required
+                                >
+                                    <option value="">Select Teacher</option>
+                                    {teachers.map(teacher => (
+                                        <option key={teacher.id} value={teacher.id}>{teacher.firstName} {teacher.lastName}</option>
+                                    ))}
+                                </select>
+                            </div>
+                        </div>
+                        <div className="col-md-6">
+                            <div className="mb-3">
+                                <label htmlFor="room" className="form-label">Room (Optional)</label>
+                                <input
+                                    type="text"
+                                    className="form-control"
+                                    id="room"
+                                    name="room"
+                                    value={formData.room}
+                                    onChange={handleChange}
+                                />
+                            </div>
                         </div>
                     </div>
-                </div>
-                <div className="row">
-                    <div className="col-md-6">
-                        <div className="mb-3">
-                            <label htmlFor="teacherId" className="form-label">Teacher</label>
-                            <select
-                                className="form-select"
-                                id="teacherId"
-                                name="teacherId"
-                                value={formData.teacherId}
-                                onChange={handleChange}
-                                required
-                            >
-                                <option value="">Select Teacher</option>
-                                {teachers.map(teacher => (
-                                    <option key={teacher.id} value={teacher.id}>{teacher.firstName} {teacher.lastName}</option>
-                                ))}
-                            </select>
+                    <div className="row">
+                        <div className="col-md-6">
+                            <div className="mb-3">
+                                <label htmlFor="startTime" className="form-label">Start Time</label>
+                                <input
+                                    type="datetime-local"
+                                    className="form-control"
+                                    id="startTime"
+                                    name="startTime"
+                                    value={formData.startTime}
+                                    min={currentTime}
+                                    onChange={handleChange}
+                                    required
+                                />
+                            </div>
+                        </div>
+                        <div className="col-md-6">
+                            <div className="mb-3">
+                                <label htmlFor="endTime" className="form-label">End Time</label>
+                                <input
+                                    type="datetime-local"
+                                    className="form-control"
+                                    id="endTime"
+                                    name="endTime"
+                                    value={formData.endTime}
+                                    min={currentTime}
+                                    onChange={handleChange}
+                                    required
+                                />
+                            </div>
                         </div>
                     </div>
-                    <div className="col-md-6">
-                        <div className="mb-3">
-                            <label htmlFor="room" className="form-label">Room (Optional)</label>
-                            <input
-                                type="text"
-                                className="form-control"
-                                id="room"
-                                name="room"
-                                value={formData.room}
-                                onChange={handleChange}
-                            />
-                        </div>
-                    </div>
-                </div>
-                <div className="row">
-                    <div className="col-md-6">
-                        <div className="mb-3">
-                            <label htmlFor="startTime" className="form-label">Start Time</label>
-                            <input
-                                type="datetime-local"
-                                className="form-control"
-                                id="startTime"
-                                name="startTime"
-                                value={formData.startTime}
-                                min={currentTime}
-                                onChange={handleChange}
-                                required
-                            />
-                        </div>
-                    </div>
-                    <div className="col-md-6">
-                        <div className="mb-3">
-                            <label htmlFor="endTime" className="form-label">End Time</label>
-                            <input
-                                type="datetime-local"
-                                className="form-control"
-                                id="endTime"
-                                name="endTime"
-                                value={formData.endTime}
-                                min={currentTime}
-                                onChange={handleChange}
-                                required
-                            />
-                        </div>
-                    </div>
-                </div>
-                <button type="submit" className="btn btn-primary">Create Schedule</button>
-            </form>
+                    <button type="submit" className="btn btn-primary">Create Schedule</button>
+                </form>
+            ) : null}
 
             <h3>Existing Schedules</h3>
             <div className="table-responsive">

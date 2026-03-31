@@ -1,75 +1,79 @@
-
 import React from 'react';
-import { Outlet, Link } from 'react-router-dom';
+import { Outlet, Link, useLocation } from 'react-router-dom';
 import 'bootstrap/dist/css/bootstrap.min.css';
-import '../css/AdminDashboard.css'; // Custom CSS for light theme
+import '../css/AdminDashboard.css';
 import Footer from './Footer';
 
 function AdminDashboard() {
+    const location = useLocation();
+
+    const isActive = (path) => {
+        return location.pathname.includes(path) ? "nav-link active" : "nav-link";
+    };
+
     return (
         <div className="admin-dashboard">
-            <div className="container-fluid">
-                {/* Header */}
-                <header className="navbar navbar-expand-lg navbar-light bg-white border-bottom">
-                    <div className="container-fluid">
-                        <span className="navbar-brand mb-0 h1">SmartRoll</span>
-                        <div className="d-flex">
-                            <Link to="/admin-login" className="btn btn-outline-primary">
-                                <i className="bi bi-box-arrow-right"></i> Logout
-                            </Link>
-                        </div>
-                    </div>
-                </header>
-                <div className="row">
-                    {/* Sidebar Navigation */}
-                    <nav className="col-md-3 col-lg-2 d-md-block bg-light sidebar">
-                        <div className="position-sticky">
-                            <ul className="nav flex-column">
-                                <li className="nav-item">
-                                    <Link className="nav-link" to="">
-                                        <i className="bi bi-house-door"></i> Home
-                                    </Link>
-                                </li>
-                                <li className="nav-item">
-                                    <Link className="nav-link" to="teachers">
-                                        <i className="bi bi-person-badge"></i> Teachers
-                                    </Link>
-                                </li>
-                                <li className="nav-item">
-                                    <Link className="nav-link" to="students">
-                                        <i className="bi bi-people"></i> Students
-                                    </Link>
-                                </li>
-                                <li className="nav-item">
-                                    <Link className="nav-link" to="subjects">
-                                        <i className="bi bi-book"></i> Subjects
-                                    </Link>
-                                </li>
-                                <li className="nav-item">
-                                    <Link className="nav-link" to="classes">
-                                        <i className="bi bi-building"></i> Classes
-                                    </Link>
-                                </li>
-                                <li className="nav-item">
-                                    <Link className="nav-link" to="schedules">
-                                        <i className="bi bi-calendar-event"></i> Schedules
-                                    </Link>
-                                </li>
-                                <li className="nav-item">
-                                    <Link className="nav-link" to="teacher-subject-class">
-                                        <i className="bi bi-diagram-3"></i> Academic Mapping
-                                    </Link>
-                                </li>
-                            </ul>
-                        </div>
-                    </nav>
 
-                    {/* Main Content Area */}
-                    <main className="col-md-9 ms-sm-auto col-lg-10 px-md-4">
-                        <Outlet />
-                    </main>
+            {/* HEADER */}
+            {/* HEADER */}
+            <header className="admin-header">
+
+                {/* LEFT: Logo */}
+                <h4 className="logo-text">SmartRoll</h4>
+
+                {/* CENTER: Title */}
+                <div className="dashboard-title">
+                    Admin Dashboard
                 </div>
+
+                {/* RIGHT: Logout */}
+                <Link to="/admin-login" className="logout-btn">
+                    Logout
+                </Link>
+
+            </header>
+            <div className="dashboard-body">
+
+                {/* SIDEBAR */}
+                <nav className="sidebar">
+                    <h6 className="menu-title">MENU</h6>
+
+                    <Link className={isActive('/admin')} to="">
+                        🏠 Dashboard
+                    </Link>
+
+                    <Link className={isActive('teachers')} to="teachers">
+                        👨‍🏫 Teachers
+                    </Link>
+
+                    <Link className={isActive('students')} to="students">
+                        👨‍🎓 Students
+                    </Link>
+
+                    <Link className={isActive('subjects')} to="subjects">
+                        📚 Subjects
+                    </Link>
+
+                    <Link className={isActive('classes')} to="classes">
+                        🏫 Classes
+                    </Link>
+
+                    <Link className={isActive('schedules')} to="schedules">
+                        📅 Schedule
+                    </Link>
+
+                    <Link className={isActive('teacher-subject-class')} to="teacher-subject-class">
+                        🔗 Mapping
+                    </Link>
+                </nav>
+
+                {/* MAIN */}
+                <main className="main-content">
+                    <Outlet />
+                </main>
+
             </div>
+
             <Footer />
         </div>
     );

@@ -26,13 +26,17 @@ const Teachers = () => {
     const [emailSubject, setEmailSubject] = useState('');
     const [emailBody, setEmailBody] = useState('');
 
-    const API_BASE = '/api/admin/teachers';
+    const userRole = localStorage.getItem('userRole') || localStorage.getItem('role') || '';
+    const isAdmin = userRole === 'ADMIN';
+    const API_BASE = isAdmin ? '/api/admin/teachers' : '/api/teachers';
 
     const getAuthHeader = () => ({ 'Authorization': `Bearer ${localStorage.getItem('token')}` });
 
     useEffect(() => {
-        fetchTeachers();
-    }, []);
+        if (isAdmin) {
+            fetchTeachers();
+        }
+    }, [isAdmin]);
 
     useEffect(() => {
         const teacherArray = Array.isArray(teachers) ? teachers : [];
@@ -78,6 +82,10 @@ const Teachers = () => {
     };
 
     const handleAdd = () => {
+        if (!isAdmin) {
+            alert('Access denied: only admin can add teachers.');
+            return;
+        }
         setEditingTeacher(null);
         setFormData({
             firstName: '',
@@ -97,6 +105,10 @@ const Teachers = () => {
     };
 
     const handleSendEmail = async () => {
+        if (!isAdmin) {
+            alert('Access denied: only admin can send bulk email.');
+            return;
+        }
         if (selectedTeachers.length === 0) {
             alert('Please select teachers first');
             return;
@@ -130,6 +142,10 @@ const Teachers = () => {
     };
 
     const handleEdit = (teacher) => {
+        if (!isAdmin) {
+            alert('Access denied: only admin can edit teachers.');
+            return;
+        }
         setEditingTeacher(teacher);
         setFormData({
             firstName: teacher.firstName || '',
@@ -144,6 +160,10 @@ const Teachers = () => {
     };
 
     const handleDelete = async (id) => {
+        if (!isAdmin) {
+            alert('Access denied: only admin can delete teachers.');
+            return;
+        }
         if (window.confirm('Are you sure you want to delete this teacher?')) {
             try {
                 const token = localStorage.getItem('token');
@@ -195,6 +215,17 @@ const Teachers = () => {
 
     if (loading) return <div className="text-center mt-5">Loading...</div>;
     if (error) return <div className="alert alert-danger">Error: {error}</div>;
+
+    if (!isAdmin) {
+        return (
+            <div className="container-fluid py-4">
+                <div className="alert alert-warning">
+                    Access denied: admin privileges are required to manage teachers.
+                    Please log in as an admin user.
+                </div>
+            </div>
+        );
+    }
 
     return (
         <div className="container-fluid py-4">
