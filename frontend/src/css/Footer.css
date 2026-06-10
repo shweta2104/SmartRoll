@@ -1,18 +1,31 @@
-/* Footer.css - Simple Bootstrap-based design for Footer component */
+/* Footer.css - Consistent footer styling for SmartRoll */
 
-footer {
-    background-color: #f8f9fa;
-    border-top: 1px solid #dee2e6;
-    margin-top: auto;
+.app-footer {
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    width: 100%;
+    background-color: #eff1f5;
+    border-top: 1px solid rgba(249, 251, 255, 0.81);
+    color: #000000;
+    z-index: 1000;
 }
 
-footer .container {
-    padding: 1rem 0;
+.footer-content {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 1rem 1.25rem;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+    color: black;
 }
 
-footer p {
-    margin-bottom: 0;
-    color: #6c757d;
-    font-size: 0.9rem;
+.footer-content p {
+    margin: 0;
+    color: #2a2929;
+    font-size: 0.95rem;
     text-align: center;
 }

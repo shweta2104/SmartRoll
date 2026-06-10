@@ -1,20 +1,22 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
+import useAuth from '../../hooks/useAuth';
 import 'bootstrap/dist/css/bootstrap.min.css';
 
 const TeacherClasses = () => {
     const [assignments, setAssignments] = useState([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
-
-    // Get teacher ID from localStorage
-    const teacherId = localStorage.getItem('userId');
+    const { userId, token } = useAuth();
 
     useEffect(() => {
         const fetchAssignments = async () => {
+            if (!userId || !token) {
+                setLoading(false);
+                return;
+            }
             try {
-                const token = localStorage.getItem('token');
-                const response = await axios.get(`/api/teacher-subject-class/user/${teacherId}`, {
+                const response = await axios.get(`/api/teacher-subject-class/user/${userId}`, {
                     headers: {
                         Authorization: `Bearer ${token}`
                     }
@@ -29,7 +31,7 @@ const TeacherClasses = () => {
         };
 
         fetchAssignments();
-    }, [teacherId]);
+    }, [userId, token]);
 
     return (
         <div className="container mt-4">

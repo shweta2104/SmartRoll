@@ -1,0 +1,22 @@
+# Node modules
+node_modules/
+
+# React build files
+dist/
+
+# Environment files
+.env
+
+# Java build files
+target/
+*.class
+*.jar
+*.log
+
+# IDE files
+.vscode/
+.idea/
+
+# OS files
+.DS_Store
+Thumbs.db

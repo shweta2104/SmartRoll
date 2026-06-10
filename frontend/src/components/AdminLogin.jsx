@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
+import { setTabItem } from '../hooks/useAuth';
 import '../css/Login.css';
 
 const AdminLogin = () => {
@@ -18,11 +19,18 @@ const AdminLogin = () => {
         try {
             const response = await axios.post('/api/admin/login', { username: email, password });
             if (response.status === 200) {
-                // Successful login, store token and userId, redirect to admin dashboard
-                localStorage.setItem('token', response.data.token);
-                localStorage.setItem('userId', response.data.userId);
-                localStorage.setItem('role', response.data.role);
-                localStorage.setItem('userRole', response.data.role);
+                console.log('Admin login success. Response:', response.data);
+                console.log('Storing role:', response.data.role);
+                // Store admin role-specific with prefix
+                setTabItem('admin-token', response.data.token);
+                setTabItem('admin-userId', response.data.userId);
+                setTabItem('admin-role', response.data.role);
+                setTabItem('admin-userRole', response.data.role);
+                setTabItem('admin-userEmail', response.data.email || email);
+                // Set active role
+                setTabItem('activeRole', 'ADMIN');
+                setTabItem('token', response.data.token);
+                setTabItem('userId', response.data.userId);
                 navigate('/admin');
             } else {
                 setError('Invalid username or password');
@@ -89,7 +97,7 @@ const AdminLogin = () => {
                                 className="btn btn-light"
                                 onClick={togglePasswordVisibility}
                             >
-                                {showPassword ? '🙈' : '👁'}
+                                {showPassword ? '👁' : '👁'}
                             </button>
                         </div>
                     </div>

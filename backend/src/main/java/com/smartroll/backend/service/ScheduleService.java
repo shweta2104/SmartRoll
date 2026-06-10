@@ -31,6 +31,10 @@ public class ScheduleService {
         return scheduleRepository.findAll();
     }
 
+    public List<Schedule> getSchedulesByClassId(Long classId) {
+        return scheduleRepository.findByClassId(classId);
+    }
+
     public List<Schedule> getSchedulesByTeacherId(Long teacherId) {
         return scheduleRepository.findByTeacherId(teacherId);
     }

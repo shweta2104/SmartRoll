@@ -17,13 +17,6 @@ import com.smartroll.backend.entity.Teacher;
 import com.smartroll.backend.service.EmailService;
 import com.smartroll.backend.service.TeacherService;
 
-class BulkEmailRequest {
-
-    public List<Long> teacherIds;
-    public String subject;
-    public String body;
-}
-
 @RestController
 @RequestMapping("/api/admin")
 @PreAuthorize("hasRole('ADMIN')")
@@ -38,7 +31,7 @@ public class AdminEmailController {
     private TeacherService teacherService;
 
     @PostMapping("/teachers/bulk-email")
-    public ResponseEntity<String> sendBulkEmail(@RequestBody BulkEmailRequest request) {
+    public ResponseEntity<String> sendBulkEmail(@RequestBody TeacherBulkEmailRequest request) {
         try {
             List<Teacher> teachers = teacherService.getAllTeachers().stream()
                     .filter(t -> request.teacherIds.contains(t.getId()))

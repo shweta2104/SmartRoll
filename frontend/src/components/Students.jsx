@@ -1,5 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import 'bootstrap/dist/css/bootstrap.min.css';
+import useAuth from '../hooks/useAuth';
+
 
 const Students = () => {
     const [students, setStudents] = useState([]); // All students for counts
@@ -33,8 +35,51 @@ const Students = () => {
         createdAt: ''
     });
 
+    const [showEmailModal, setShowEmailModal] = useState(false);
+    const [selectedStudents, setSelectedStudents] = useState([]);
+    const [emailSubject, setEmailSubject] = useState('');
+    const [emailBody, setEmailBody] = useState('');
+    const [verifiedAdmin, setVerifiedAdmin] = useState(false);
+    const [isAdmin, setIsAdmin] = useState(false);
+
+
+
+
+
+
+
+
+
     const API_BASE = '/api/students';
-    const getAuthHeader = () => ({ 'Authorization': `Bearer ${localStorage.getItem('token')}` });
+    const { userRole: activeUserRole, getAuthHeaders } = useAuth();
+    const userRole = activeUserRole || '';
+
+    const getAuthHeader = getAuthHeaders;
+
+    useEffect(() => {
+        const verifyAdmin = async () => {
+            try {
+                const res = await fetch('/api/admin/me', {
+                    credentials: 'include',
+                    headers: getAuthHeader()
+                });
+
+                if (res.ok) {
+                    setVerifiedAdmin(true);
+                    setIsAdmin(true);
+                } else {
+                    setVerifiedAdmin(false);
+                    setIsAdmin(userRole === 'ADMIN');
+                }
+            } catch (err) {
+                setVerifiedAdmin(false);
+                setIsAdmin(userRole === 'ADMIN');
+            }
+        };
+
+        verifyAdmin();
+    }, []);
+
 
     const fetchClassStudents = async (classId) => {
         try {
@@ -76,6 +121,58 @@ const Students = () => {
         fetchStudents();
         fetchClasses();
     }, []);
+
+    const handleSelectAllStudentsOnPage = (checked) => {
+        const pageIds = currentStudents.map((s) => s.id);
+        setSelectedStudents((prev) => {
+            if (checked) {
+                const set = new Set(prev);
+                pageIds.forEach((id) => set.add(id));
+                return Array.from(set);
+            }
+            return prev.filter((id) => !pageIds.includes(id));
+        });
+    };
+
+    const handleSendEmail = async () => {
+        if (!isAdmin) {
+            alert('Access denied: only admin can send bulk email.');
+            return;
+        }
+        if (selectedStudents.length === 0) {
+            alert('Please select students first');
+            return;
+        }
+
+        try {
+            const response = await fetch('/api/admin/students/bulk-email', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    ...getAuthHeaders()
+                },
+                body: JSON.stringify({
+                    studentIds: selectedStudents,
+                    subject: emailSubject || 'Announcement from SmartRoll Admin',
+                    body: emailBody || 'Please check your schedule and announcements.'
+                }),
+                credentials: 'include'
+            });
+
+            if (response.ok) {
+                alert('Emails sent successfully!');
+                setEmailSubject('');
+                setEmailBody('');
+                setSelectedStudents([]);
+                setShowEmailModal(false);
+            } else {
+                alert('Failed to send emails');
+            }
+        } catch (err) {
+            alert('Error: ' + err.message);
+        }
+    };
+
 
     useEffect(() => {
         let filtered = [];
@@ -231,8 +328,18 @@ const Students = () => {
                     <button className="btn btn-primary" onClick={handleAdd}>
                         + Add Student
                     </button>
+                    <button className="btn btn-success" onClick={() => setShowEmailModal(true)} disabled={selectedStudents.length === 0}>
+                        📧 Send Email ({selectedStudents.length})
+                    </button>
                 </div>
             </div>
+
+            {!isAdmin && (
+                <div className="alert alert-warning">
+                    Access denied: admin privileges required. Backend verify: {verifiedAdmin ? 'pass' : 'fail/pending'}.
+                    <br />Re-login if needed.
+                </div>
+            )}
 
             {/* Class Selection Cards */}
             <div className="row mb-5">
@@ -276,6 +383,13 @@ const Students = () => {
                         <table className="table table-striped table-bordered">
                             <thead className="table-dark">
                                 <tr>
+                                    <th>
+                                        <input
+                                            type="checkbox"
+                                            onChange={(e) => handleSelectAllStudentsOnPage(e.target.checked)}
+                                            checked={currentStudents.length > 0 && currentStudents.every(s => selectedStudents.includes(s.id))}
+                                        />
+                                    </th>
                                     <th>Student ID</th>
                                     <th>Roll No</th>
                                     <th>Name</th>
@@ -288,6 +402,18 @@ const Students = () => {
                             <tbody>
                                 {currentStudents.map(student => (
                                     <tr key={student.id}>
+                                        <td>
+                                            <input
+                                                type="checkbox"
+                                                checked={selectedStudents.includes(student.id)}
+                                                onChange={(e) => {
+                                                    const checked = e.target.checked;
+                                                    setSelectedStudents((prev) =>
+                                                        checked ? [...prev, student.id] : prev.filter((id) => id !== student.id)
+                                                    );
+                                                }}
+                                            />
+                                        </td>
                                         <td>{student.studentId}</td>
                                         <td>{student.rollNo}</td>
                                         <td>{student.firstName} {student.lastName}</td>
@@ -422,6 +548,53 @@ const Students = () => {
                                 </div>
                                 <div className="modal-footer">
                                     <button type="button" className="btn btn-secondary" onClick={() => setShowViewModal(false)}>Close</button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </>
+            )}
+
+            {/* Bulk Email Modal */}
+            {showEmailModal && (
+                <>
+                    <div className="modal-backdrop show" onClick={() => setShowEmailModal(false)}></div>
+                    <div className="modal show d-block" tabIndex="-1">
+                        <div className="modal-dialog">
+                            <div className="modal-content">
+                                <div className="modal-header">
+                                    <h5 className="modal-title">Send Bulk Email to {selectedStudents.length} Student(s)</h5>
+                                    <button type="button" className="btn-close" onClick={() => setShowEmailModal(false)}></button>
+                                </div>
+                                <div className="modal-body">
+                                    <div className="mb-3">
+                                        <label className="form-label">Subject</label>
+                                        <input
+                                            type="text"
+                                            className="form-control"
+                                            value={emailSubject}
+                                            onChange={(e) => setEmailSubject(e.target.value)}
+                                            placeholder="Announcement from SmartRoll Admin"
+                                        />
+                                    </div>
+                                    <div className="mb-3">
+                                        <label className="form-label">Message</label>
+                                        <textarea
+                                            className="form-control"
+                                            rows="5"
+                                            value={emailBody}
+                                            onChange={(e) => setEmailBody(e.target.value)}
+                                            placeholder="Please check your schedule and announcements."
+                                        />
+                                    </div>
+                                </div>
+                                <div className="modal-footer">
+                                    <button type="button" className="btn btn-secondary" onClick={() => setShowEmailModal(false)}>
+                                        Cancel
+                                    </button>
+                                    <button type="button" className="btn btn-primary" onClick={handleSendEmail}>
+                                        Send Email
+                                    </button>
                                 </div>
                             </div>
                         </div>

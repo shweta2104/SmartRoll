@@ -2,7 +2,6 @@ import React from 'react';
 import { Outlet, Link, Routes, Route } from 'react-router-dom';
 import 'bootstrap/dist/css/bootstrap.min.css';
 import '../css/AdminDashboard.css'; // Custom CSS for light theme
-import Footer from './Footer';
 import Teachers from './Teachers';
 import Students from './Students';
 import Subjects from './Subject';
@@ -70,7 +69,6 @@ function AdminDashboard() {
                     </main>
                 </div>
             </div>
-            <Footer />
         </div>
     );
 }

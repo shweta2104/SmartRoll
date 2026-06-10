@@ -34,6 +34,14 @@ public class StudentService {
         return studentRepository.findByRollNo(rollNo);
     }
 
+    public Optional<Student> getStudentByNameIgnoreCase(String firstName, String lastName) {
+        return studentRepository.findByFirstNameIgnoreCaseAndLastNameIgnoreCase(firstName, lastName);
+    }
+
+    public Optional<Student> getStudentByEmail(String email) {
+        return studentRepository.findByEmail(email);
+    }
+
     public Student saveStudent(Student student) {
         // Add validation logic here if needed
         return studentRepository.save(student);
@@ -61,4 +69,9 @@ public class StudentService {
                 .filter(s -> !"DELETED".equals(s.getStatus()))
                 .collect(Collectors.toList());
     }
+
+    public Optional<Student> getStudentByUserId(Integer userId) {
+        return studentRepository.findByUserId(userId);
+    }
 }
+

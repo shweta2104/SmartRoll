@@ -80,11 +80,16 @@ public class TeacherController {
 
     @GetMapping
     @PreAuthorize("hasAnyRole('TEACHER', 'ADMIN')")
-    public List<Teacher> getAllTeachers() {
-        logger.debug("Fetching all teachers");
-        List<Teacher> teachers = teacherService.getAllTeachers();
-        logger.debug("Found {} teachers", teachers.size());
-        return teachers;
+    public ResponseEntity<?> getAllTeachers() {
+        try {
+            logger.debug("Fetching all teachers");
+            List<Teacher> teachers = teacherService.getAllTeachers();
+            logger.debug("Found {} teachers", teachers.size());
+            return ResponseEntity.ok(teachers);
+        } catch (Exception e) {
+            logger.error("Error fetching teachers: " + e.getMessage(), e);
+            return ResponseEntity.status(500).body("Error fetching teachers: " + e.getMessage());
+        }
     }
 
     @GetMapping("/count")

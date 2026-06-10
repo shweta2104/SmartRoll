@@ -17,9 +17,7 @@
   display: flex;
   flex-direction: column;
   min-height: 100vh;
-}
 
-/* Footer styles */
-footer {
-  margin-top: auto;
+  /* Space for fixed footer so page content doesn't get overlapped */
+  padding-bottom: 6rem;
 }

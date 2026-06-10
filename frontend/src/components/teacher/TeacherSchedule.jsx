@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
+import useAuth from '../../hooks/useAuth';
 import 'bootstrap/dist/css/bootstrap.min.css';
 
 function TeacherSchedule() {
@@ -9,10 +10,10 @@ function TeacherSchedule() {
     const [teacher, setTeacher] = useState(null);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState('');
+    const { userId, token } = useAuth();
 
     useEffect(() => {
         const fetchTeacher = async () => {
-            const userId = localStorage.getItem('userId');
             if (!userId) {
                 setError('User not logged in');
                 setLoading(false);
@@ -22,7 +23,7 @@ function TeacherSchedule() {
             try {
                 const response = await axios.get(`/api/teachers/userId/${userId}`, {
                     headers: {
-                        Authorization: `Bearer ${localStorage.getItem('token')}`
+                        Authorization: `Bearer ${token}`
                     }
                 });
                 setTeacher(response.data);
@@ -35,7 +36,6 @@ function TeacherSchedule() {
 
         const fetchClasses = async () => {
             try {
-                const token = localStorage.getItem('token');
                 const response = await axios.get('/api/classes', {
                     headers: token ? {
                         Authorization: `Bearer ${token}`
@@ -49,7 +49,6 @@ function TeacherSchedule() {
 
         const fetchSubjects = async () => {
             try {
-                const token = localStorage.getItem('token');
                 const response = await axios.get('/api/subjects', {
                     headers: token ? {
                         Authorization: `Bearer ${token}`
@@ -64,11 +63,10 @@ function TeacherSchedule() {
         fetchTeacher();
         fetchClasses();
         fetchSubjects();
-    }, []);
+    }, [userId, token]);
 
     const fetchSchedules = async (teacherId) => {
         try {
-            const token = localStorage.getItem('token');
             const response = await axios.get(`/api/schedules/teacher/${teacherId}`, {
                 headers: token ? {
                     Authorization: `Bearer ${token}`

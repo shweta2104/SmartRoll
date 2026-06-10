@@ -1,7 +1,6 @@
 import React from 'react';
 import { Outlet, Link, useLocation } from 'react-router-dom';
 import '../../css/TeacherDashboard.css';
-import Footer from '../Footer';
 
 const TeacherDashboard = () => {
     const location = useLocation();
@@ -48,10 +47,9 @@ const TeacherDashboard = () => {
                 </main>
 
             </div>
-
-            <Footer />
         </div>
     );
 };
 
 export default TeacherDashboard;
+

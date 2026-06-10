@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import 'bootstrap/dist/css/bootstrap.min.css';
 import { useNavigate } from 'react-router-dom';
-import '../css/login.css';
+import '../css/EmailLookup.css';
 
 const TeacherEmailLookup = () => {
     const [firstName, setFirstName] = useState('');

@@ -1,10 +1,11 @@
 import React from 'react';
+import '../css/Footer.css';
 
 const Footer = () => {
     return (
-        <footer className="bg-light text-center text-muted py-3 mt-auto">
-            <div className="container">
-                <p className="mb-0">&copy; 2026 Smart Attendance Management System</p>
+        <footer className="app-footer">
+            <div className="footer-content">
+                <p>&copy; 2026 Smart Attendance Management System</p>
             </div>
         </footer>
     );

@@ -1,8 +1,12 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
+import useAuth from '../../hooks/useAuth';
+import TeacherAttendanceQr from './TeacherAttendanceQr';
+
 
 const TeacherAttendance = () => {
     const [teacher, setTeacher] = useState(null);
+
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState('');
     const [schedules, setSchedules] = useState([]);
@@ -22,9 +26,20 @@ const TeacherAttendance = () => {
     const navigate = useNavigate();
     const [savedInfo, setSavedInfo] = useState(null);
 
+    const [mode, setMode] = useState('MANUAL'); // MANUAL | QR
+    const [qrTokenLoading, setQrTokenLoading] = useState(false);
+
+    const [teacherAttendanceRows, setTeacherAttendanceRows] = useState([]);
+    const [teacherAttendanceLoading, setTeacherAttendanceLoading] = useState(false);
+    const [teacherAttendanceError, setTeacherAttendanceError] = useState('');
+
+    const pollingRef = useRef(null);
+
+    const { userId, token } = useAuth();
+
+
     useEffect(() => {
         const fetchTeacher = async () => {
-            const userId = localStorage.getItem('userId');
             if (!userId) {
                 setError('User not logged in');
                 setLoading(false);
@@ -36,7 +51,7 @@ const TeacherAttendance = () => {
                     method: 'GET',
                     credentials: 'include',
                     headers: {
-                        'Authorization': `Bearer ${localStorage.getItem('token')}`,
+                        'Authorization': `Bearer ${token}`,
                         'Content-Type': 'application/json',
                     },
                 });
@@ -55,7 +70,7 @@ const TeacherAttendance = () => {
         };
 
         fetchTeacher();
-    }, []);
+    }, [userId, token]);
 
     useEffect(() => {
         if (!teacher) return;
@@ -67,7 +82,7 @@ const TeacherAttendance = () => {
                         method: 'GET',
                         credentials: 'include',
                         headers: {
-                            'Authorization': `Bearer ${localStorage.getItem('token')}`,
+                            'Authorization': `Bearer ${token}`,
                             'Content-Type': 'application/json',
                         },
                     }),
@@ -75,7 +90,7 @@ const TeacherAttendance = () => {
                         method: 'GET',
                         credentials: 'include',
                         headers: {
-                            'Authorization': `Bearer ${localStorage.getItem('token')}`,
+                            'Authorization': `Bearer ${token}`,
                             'Content-Type': 'application/json',
                         },
                     }),
@@ -146,7 +161,7 @@ const TeacherAttendance = () => {
                 method: 'GET',
                 credentials: 'include',
                 headers: {
-                    'Authorization': `Bearer ${localStorage.getItem('token')}`,
+                    'Authorization': `Bearer ${token}`,
                     'Content-Type': 'application/json',
                 },
             });
@@ -218,7 +233,7 @@ const TeacherAttendance = () => {
                 method: 'GET',
                 credentials: 'include',
                 headers: {
-                    'Authorization': `Bearer ${localStorage.getItem('token')}`,
+                    'Authorization': `Bearer ${token}`,
                     'Content-Type': 'application/json',
                 }
             });
@@ -260,7 +275,7 @@ const TeacherAttendance = () => {
                     method: 'POST',
                     credentials: 'include',
                     headers: {
-                        'Authorization': `Bearer ${localStorage.getItem('token')}`,
+                        'Authorization': `Bearer ${token}`,
                         'Content-Type': 'application/json',
                     },
                     body: JSON.stringify(attendanceData)
@@ -299,11 +314,12 @@ const TeacherAttendance = () => {
                     const deletePromises = needsUpdate.map(failed => {
                         const existingRecord = existingAttendance.find(a => a.studentId === failed.student.id);
                         if (existingRecord && existingRecord.attendanceId) {
-                            return fetch(`/api/attendance/${existingRecord.attendanceId}`, {
+                            return fetch(`/api/attendance/by-id/${existingRecord.attendanceId}`, {
+
                                 method: 'DELETE',
                                 credentials: 'include',
                                 headers: {
-                                    'Authorization': `Bearer ${localStorage.getItem('token')}`,
+                                    'Authorization': `Bearer ${token}`,
                                     'Content-Type': 'application/json',
                                 }
                             }).catch(err => ({ ok: false, status: 500, statusText: err.message }));
@@ -332,7 +348,7 @@ const TeacherAttendance = () => {
                                 method: 'POST',
                                 credentials: 'include',
                                 headers: {
-                                    'Authorization': `Bearer ${localStorage.getItem('token')}`,
+                                    'Authorization': `Bearer ${token}`,
                                     'Content-Type': 'application/json',
                                 },
                                 body: JSON.stringify(attendanceData)
@@ -413,7 +429,39 @@ const TeacherAttendance = () => {
                         </div>
                     </div>
                     <hr />
+
                     <div className="row mb-3">
+                        <div className="col-md-12">
+                            <label className="form-label"><strong>Attendance Mode:</strong></label>
+                            <div className="d-flex gap-3">
+                                <div className="form-check">
+                                    <input
+                                        className="form-check-input"
+                                        type="radio"
+                                        name="attendanceMode"
+                                        id="modeManual"
+                                        checked={mode === 'MANUAL'}
+                                        onChange={() => setMode('MANUAL')}
+                                    />
+                                    <label className="form-check-label" htmlFor="modeManual">Manual Attendance</label>
+                                </div>
+                                <div className="form-check">
+                                    <input
+                                        className="form-check-input"
+                                        type="radio"
+                                        name="attendanceMode"
+                                        id="modeQr"
+                                        checked={mode === 'QR'}
+                                        onChange={() => setMode('QR')}
+                                    />
+                                    <label className="form-check-label" htmlFor="modeQr">QR Code Attendance</label>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div className="row mb-3">
+
                         <div className="col-md-4">
                             <label htmlFor="classSelect" className="form-label"><strong>Select Class:</strong></label>
                             <select
@@ -470,10 +518,13 @@ const TeacherAttendance = () => {
                             </button>
                         </div>
                     </div>
-                    {attendanceLoaded && (
+                    {mode === 'MANUAL' && attendanceLoaded && (
                         <div className="mt-4">
                             <h3 className="mb-3">📋 Student Attendance Table</h3>
                             <table className="table table-striped table-bordered">
+
+
+
                                 <thead className="table-dark">
                                     <tr>
                                         <th>Roll No</th>
@@ -527,6 +578,136 @@ const TeacherAttendance = () => {
                             </div>
                         </div>
                     )}
+
+                    {mode === 'QR' && (
+                        <>
+                            <TeacherAttendanceQr
+                                selectedClass={selectedClass}
+                                selectedSubject={selectedSubject}
+                                selectedTimeSlot={selectedTimeSlot}
+                                schedules={schedules}
+                                tokenLoading={qrTokenLoading}
+                                setTokenLoading={setQrTokenLoading}
+                                error={error}
+                                setError={setError}
+                                generateDate={() => new Date().toISOString().split('T')[0]}
+                                teacherId={teacher?.id}
+                                token={token}
+                                onTokenGenerated={() => {
+                                    // Start polling teacher list once token exists (QR already generated)
+                                    try {
+                                        if (!selectedClass || !selectedSubject || !selectedTimeSlot) return;
+
+                                        // Determine matching scheduleId for the selected dropdowns
+                                        const matchingSchedule = schedules.find(schedule => {
+                                            const startTime = new Date(schedule.startTime).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+                                            const endTime = new Date(schedule.endTime).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+                                            const timeSlot = `${startTime}–${endTime}`;
+                                            return schedule.classId === parseInt(selectedClass) &&
+                                                schedule.subjectId === parseInt(selectedSubject) &&
+                                                timeSlot === selectedTimeSlot;
+                                        });
+
+                                        if (!matchingSchedule) {
+                                            setTeacherAttendanceError('Unable to find matching schedule.');
+                                            return;
+                                        }
+
+                                        const scheduleId = matchingSchedule.id;
+                                        const currentDate = new Date().toISOString().split('T')[0];
+
+                                        const fetchList = async () => {
+                                            setTeacherAttendanceLoading(true);
+                                            setTeacherAttendanceError('');
+                                            try {
+                                                const res = await fetch(
+                                                    `/api/attendance/teacher/list?scheduleId=${scheduleId}&classId=${parseInt(selectedClass)}&date=${currentDate}`,
+                                                    {
+                                                        method: 'GET',
+                                                        credentials: 'include',
+                                                        headers: {
+                                                            'Authorization': `Bearer ${token}`,
+                                                            'Content-Type': 'application/json',
+                                                        }
+                                                    }
+                                                );
+
+                                                const data = await res.json().catch(() => null);
+                                                if (!res.ok) {
+                                                    setTeacherAttendanceError(data?.message || `Failed to load attendance list (HTTP ${res.status})`);
+                                                    return;
+                                                }
+
+                                                setTeacherAttendanceRows(data?.rows || []);
+                                            } catch (e) {
+                                                setTeacherAttendanceError(e?.message || 'Failed to load attendance list');
+                                            } finally {
+                                                setTeacherAttendanceLoading(false);
+                                            }
+                                        };
+
+                                        // immediate fetch
+                                        fetchList();
+
+                                        // clear old poll
+                                        if (pollingRef.current) {
+                                            clearInterval(pollingRef.current);
+                                        }
+
+                                        pollingRef.current = setInterval(fetchList, 2000);
+                                    } catch (e) {
+                                        setTeacherAttendanceError(e?.message || 'Polling failed');
+                                    }
+                                }}
+                            />
+
+                            <div className="mt-4">
+                                <h3 className="mb-3">📋 QR Attendance (Present + Absent)</h3>
+                                {teacherAttendanceError && (
+                                    <div className="alert alert-danger">{teacherAttendanceError}</div>
+                                )}
+                                <div className="alert alert-secondary" style={{ marginBottom: '10px' }}>
+                                    {teacherAttendanceLoading ? 'Loading...' : 'Auto-refreshing every 2 seconds after QR generation.'}
+                                </div>
+
+                                <table className="table table-striped table-bordered">
+                                    <thead className="table-dark">
+                                        <tr>
+                                            <th>Roll No</th>
+                                            <th>Student Name</th>
+                                            <th>Sem</th>
+                                            <th>Div</th>
+                                            <th>Status</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        {teacherAttendanceRows.map((row) => (
+                                            <tr key={row.studentId}>
+                                                <td>{row.rollNo}</td>
+                                                <td>{row.firstName} {row.lastName}</td>
+                                                <td>{row.sem || '—'}</td>
+                                                <td>{row.division || '—'}</td>
+                                                <td
+                                                    style={{
+                                                        fontWeight: 700,
+                                                        color: row.status === 'PRESENT' ? '#198754' : '#dc3545',
+                                                    }}
+                                                >
+                                                    {row.status === 'PRESENT' ? 'Present' : 'Absent'}
+                                                </td>
+                                            </tr>
+                                        ))}
+                                        {teacherAttendanceRows.length === 0 && (
+                                            <tr>
+                                                <td colSpan="5" className="text-center text-muted">No rows yet. Generate QR and scan from students.</td>
+                                            </tr>
+                                        )}
+                                    </tbody>
+                                </table>
+                            </div>
+                        </>
+                    )}
+
                 </div>
             </div>
         </div>

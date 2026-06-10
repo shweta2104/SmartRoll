@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
+import useAuth from '../../hooks/useAuth';
 
 const AttendanceReport = () => {
     const location = useLocation();
@@ -29,6 +30,8 @@ const AttendanceReport = () => {
     const [timeSlot, setTimeSlot] = useState('');
     const [showReport, setShowReport] = useState(false);
 
+    const { userId, token } = useAuth();
+
     // Get query parameters from URL
     useEffect(() => {
         const params = new URLSearchParams(location.search);
@@ -41,12 +44,13 @@ const AttendanceReport = () => {
             setDate(dateParam);
         } else {
             // Load teacher data for selection form
-            loadTeacherData();
+            if (userId && token) {
+                loadTeacherData();
+            }
         }
-    }, [location]);
+    }, [location, userId, token]);
 
     const loadTeacherData = async () => {
-        const userId = localStorage.getItem('userId');
         if (!userId) {
             setError('User not logged in');
             setLoading(false);
@@ -58,7 +62,7 @@ const AttendanceReport = () => {
                 method: 'GET',
                 credentials: 'include',
                 headers: {
-                    'Authorization': `Bearer ${localStorage.getItem('token')}`,
+                    'Authorization': `Bearer ${token}`,
                     'Content-Type': 'application/json',
                 },
             });
@@ -73,7 +77,7 @@ const AttendanceReport = () => {
                         method: 'GET',
                         credentials: 'include',
                         headers: {
-                            'Authorization': `Bearer ${localStorage.getItem('token')}`,
+                            'Authorization': `Bearer ${token}`,
                             'Content-Type': 'application/json',
                         },
                     }),
@@ -81,7 +85,7 @@ const AttendanceReport = () => {
                         method: 'GET',
                         credentials: 'include',
                         headers: {
-                            'Authorization': `Bearer ${localStorage.getItem('token')}`,
+                            'Authorization': `Bearer ${token}`,
                             'Content-Type': 'application/json',
                         },
                     }),
@@ -141,7 +145,7 @@ const AttendanceReport = () => {
                 method: 'GET',
                 credentials: 'include',
                 headers: {
-                    'Authorization': `Bearer ${localStorage.getItem('token')}`,
+                    'Authorization': `Bearer ${token}`,
                     'Content-Type': 'application/json',
                 },
             });
@@ -155,7 +159,7 @@ const AttendanceReport = () => {
                     method: 'GET',
                     credentials: 'include',
                     headers: {
-                        'Authorization': `Bearer ${localStorage.getItem('token')}`,
+                        'Authorization': `Bearer ${token}`,
                         'Content-Type': 'application/json',
                     },
                 });
@@ -175,7 +179,7 @@ const AttendanceReport = () => {
                     method: 'GET',
                     credentials: 'include',
                     headers: {
-                        'Authorization': `Bearer ${localStorage.getItem('token')}`,
+                        'Authorization': `Bearer ${token}`,
                         'Content-Type': 'application/json',
                     },
                 });
@@ -190,7 +194,7 @@ const AttendanceReport = () => {
                     method: 'GET',
                     credentials: 'include',
                     headers: {
-                        'Authorization': `Bearer ${localStorage.getItem('token')}`,
+                        'Authorization': `Bearer ${token}`,
                         'Content-Type': 'application/json',
                     },
                 });

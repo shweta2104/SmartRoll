@@ -2,7 +2,6 @@ import React, { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import 'bootstrap/dist/css/bootstrap.min.css';
 import '../css/Home.css';
-import Footer from './Footer';
 
 const Home = () => {
 
@@ -96,10 +95,9 @@ const Home = () => {
                     </Link>
                 </div>
             </section>
-
-            <Footer />
         </div>
     );
 };
 
 export default Home;
+

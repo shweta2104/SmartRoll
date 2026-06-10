@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import 'bootstrap/dist/css/bootstrap.min.css';
+import useAuth from '../hooks/useAuth';
 
 const Subjects = () => {
     const [subjects, setSubjects] = useState([]);
@@ -29,8 +30,8 @@ const Subjects = () => {
         status: 'ACTIVE'
     });
 
-    const token = localStorage.getItem('token');
-    const AUTH_HEADER = token ? { 'Authorization': `Bearer ${token}` } : {};
+    const { token, getAuthHeaders } = useAuth();
+    const AUTH_HEADER = getAuthHeaders();
 
     const API_BASE = '/api/subjects';
 

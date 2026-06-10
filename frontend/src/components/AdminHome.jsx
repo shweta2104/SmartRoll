@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
+import useAuth from '../hooks/useAuth';
 
 const AdminHome = () => {
     const [counts, setCounts] = useState({
@@ -16,8 +17,8 @@ const AdminHome = () => {
     const [error, setError] = useState(null);
 
     const API_BASE = '/api';
-    const token = localStorage.getItem('token');
-    const AUTH_HEADER = token ? { 'Authorization': `Bearer ${token}` } : {};
+    const { getAuthHeaders } = useAuth();
+    const AUTH_HEADER = getAuthHeaders();
 
     useEffect(() => {
         fetchCounts();

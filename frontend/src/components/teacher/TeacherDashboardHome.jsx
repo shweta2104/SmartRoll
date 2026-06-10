@@ -1,5 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
+import useAuth from '../../hooks/useAuth';
+
 import { Line, Bar } from 'react-chartjs-2';
 import {
     Chart as ChartJS,
@@ -41,14 +43,12 @@ const TeacherDashboardHome = () => {
     const [lowAttendanceStudents, setLowAttendanceStudents] = useState([]);
     const [notifications, setNotifications] = useState([]);
 
+    const { token, userId, getAuthHeaders } = useAuth();
+
     useEffect(() => {
         const fetchDashboardData = async () => {
-            const token = localStorage.getItem('token');
-            const userId = localStorage.getItem('userId');
-            const headers = {
-                'Authorization': `Bearer ${token}`,
-                'Content-Type': 'application/json'
-            };
+            if (!token || !userId) return;
+            const headers = getAuthHeaders();
 
             try {
                 // First: Fetch classes to get classIds
@@ -68,7 +68,7 @@ const TeacherDashboardHome = () => {
                 const [studentsRes, teacherRes, scheduleRes] = await Promise.all([
                     fetch('/api/students', { headers, credentials: 'include' }),
                     fetch(`/api/teachers/userId/${userId}`, { headers, credentials: 'include' }),
-                    fetch('/api/teacher-subject-class/teacher', { headers, credentials: 'include' })
+                    fetch('/api/teacher-subject-class/user/' + userId, { headers, credentials: 'include' })
                 ]);
 
                 // Total Students
@@ -81,6 +81,12 @@ const TeacherDashboardHome = () => {
                 if (teacherRes.ok) {
                     const teacher = await teacherRes.json();
                     setTodayClass(teacher);
+                }
+
+                // Assignments (not currently used for stats)
+                if (scheduleRes.ok) {
+                    // const assignments = await scheduleRes.json();
+                    // setAssignments(assignments);
                 }
 
                 // Subject-wise Data

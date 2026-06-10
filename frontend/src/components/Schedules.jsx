@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import 'bootstrap/dist/css/bootstrap.min.css';
+import useAuth from '../hooks/useAuth';
 
 function Schedules() {
     const [schedules, setSchedules] = useState([]);
@@ -19,8 +20,24 @@ function Schedules() {
     const [error, setError] = useState('');
     const [success, setSuccess] = useState('');
 
-    const userRole = localStorage.getItem('userRole') || localStorage.getItem('role') || '';
-    const isAdmin = userRole === 'ADMIN';
+    const { userRole, getAuthHeaders } = useAuth();
+    const [verifiedAdminSchedules, setVerifiedAdminSchedules] = useState(false);
+
+    useEffect(() => {
+        const verifyAdminSchedules = async () => {
+            try {
+                const res = await fetch('/api/admin/me', { credentials: 'include', headers: getAuthHeaders() });
+                if (res.ok) {
+                    setVerifiedAdminSchedules(true);
+                }
+            } catch {
+                // fail silent
+            }
+        };
+        verifyAdminSchedules();
+    }, []);
+
+    const isAdmin = verifiedAdminSchedules || userRole === 'ADMIN';
 
     useEffect(() => {
         fetchSchedules();
@@ -40,12 +57,7 @@ function Schedules() {
 
     const fetchSchedules = async () => {
         try {
-            const token = localStorage.getItem('token');
-            const response = await axios.get('/api/schedules', {
-                headers: token ? {
-                    Authorization: `Bearer ${token}`
-                } : {}
-            });
+            const response = await axios.get('/api/schedules', { headers: getAuthHeaders() });
             setSchedules(response.data);
         } catch (error) {
             console.error('Error fetching schedules:', error);
@@ -54,11 +66,8 @@ function Schedules() {
 
     const fetchClasses = async () => {
         try {
-            const token = localStorage.getItem('token');
             const response = await axios.get('/api/classes', {
-                headers: token ? {
-                    Authorization: `Bearer ${token}`
-                } : {}
+                headers: getAuthHeaders()
             });
             setClasses(response.data);
         } catch (error) {
@@ -68,11 +77,8 @@ function Schedules() {
 
     const fetchSubjects = async () => {
         try {
-            const token = localStorage.getItem('token');
             const response = await axios.get('/api/subjects', {
-                headers: token ? {
-                    Authorization: `Bearer ${token}`
-                } : {}
+                headers: getAuthHeaders()
             });
             setSubjects(response.data);
         } catch (error) {
@@ -82,11 +88,8 @@ function Schedules() {
 
     const fetchTeachers = async () => {
         try {
-            const token = localStorage.getItem('token');
             const response = await axios.get('/api/teachers', {
-                headers: {
-                    Authorization: `Bearer ${token}`
-                }
+                headers: getAuthHeaders()
             });
             setTeachers(response.data);
         } catch (error) {
@@ -138,11 +141,8 @@ function Schedules() {
         }
 
         try {
-            const token = localStorage.getItem('token');
             const response = await axios.post('/api/admin/schedules', formData, {
-                headers: {
-                    Authorization: `Bearer ${token}`
-                }
+                headers: getAuthHeaders()
             });
             setSuccess('Schedule created successfully!');
             setFormData({

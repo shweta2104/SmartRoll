@@ -54,8 +54,17 @@ public class JwtFilter extends OncePerRequestFilter {
 
                     if (email != null && role != null) {
                         // Create authorities based on role
+                        // Spring expects authorities like: ROLE_STUDENT
+                        // Our JWT role might be "STUDENT" or already "ROLE_STUDENT".
+                        // Normalize to avoid ROLE_ROLE_* double-prefix.
+                        String normalizedRole = role.trim().toUpperCase();
+                        if (normalizedRole.startsWith("ROLE_")) {
+                            normalizedRole = normalizedRole.substring("ROLE_".length());
+                        }
+
                         List<GrantedAuthority> authorities = new ArrayList<>();
-                        authorities.add(new SimpleGrantedAuthority("ROLE_" + role.toUpperCase()));
+                        authorities.add(new SimpleGrantedAuthority("ROLE_" + normalizedRole));
+
 
                         // Create authentication token with authorities
                         Authentication auth = new UsernamePasswordAuthenticationToken(

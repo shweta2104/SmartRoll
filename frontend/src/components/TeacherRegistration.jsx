@@ -131,7 +131,7 @@ function TeacherRegistration() {
                                 className="toggle-eye"
                                 onClick={() => setShowPassword(!showPassword)}
                             >
-                                {showPassword ? '🙈' : '👁'}
+                                {showPassword ? '👁' : '👁'}
                             </span>
                         </div>
 
@@ -151,7 +151,7 @@ function TeacherRegistration() {
                                 className="toggle-eye"
                                 onClick={() => setShowConfirmPassword(!showConfirmPassword)}
                             >
-                                {showConfirmPassword ? '🙈' : '👁'}
+                                {showConfirmPassword ? '👁' : '👁'}
                             </span>
                         </div>
 

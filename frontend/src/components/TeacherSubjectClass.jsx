@@ -1,7 +1,9 @@
 import React, { useState, useEffect } from 'react';
 import 'bootstrap/dist/css/bootstrap.min.css';
+import { useAuth } from '../hooks/useAuth';
 
 const TeacherSubjectClass = () => {
+    const { token } = useAuth();
     const [assignments, setAssignments] = useState([]);
     const [teachers, setTeachers] = useState([]);
     const [subjects, setSubjects] = useState([]);
@@ -18,14 +20,14 @@ const TeacherSubjectClass = () => {
         classId: ''
     });
 
-    const token = localStorage.getItem('token');
     const AUTH_HEADER = token ? { 'Authorization': `Bearer ${token}` } : {};
-
     const API_BASE = '/api';
 
     useEffect(() => {
-        fetchData();
-    }, []);
+        if (token) {
+            fetchData();
+        }
+    }, [token]);
 
     useEffect(() => {
         setFilteredAssignments(
@@ -39,14 +41,11 @@ const TeacherSubjectClass = () => {
 
     const fetchData = async () => {
         try {
-            const token = localStorage.getItem('token');
-            const headers = token ? { 'Authorization': `Bearer ${token}` } : {};
-
             const [assignmentsRes, teachersRes, subjectsRes, classesRes] = await Promise.all([
-                fetch(`${API_BASE}/teacher-subject-class`, { headers }),
-                fetch(`${API_BASE}/teachers`, { headers }),
-                fetch(`${API_BASE}/subjects`, { headers }),
-                fetch(`${API_BASE}/classes`, { headers })
+                fetch(`${API_BASE}/teacher-subject-class`, { headers: AUTH_HEADER }),
+                fetch(`${API_BASE}/teachers`, { headers: AUTH_HEADER }),
+                fetch(`${API_BASE}/subjects`, { headers: AUTH_HEADER }),
+                fetch(`${API_BASE}/classes`, { headers: AUTH_HEADER })
             ]);
 
             if (!assignmentsRes.ok || !teachersRes.ok || !subjectsRes.ok || !classesRes.ok) {

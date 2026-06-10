@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
+import useAuth from '../../hooks/useAuth';
 import 'bootstrap/dist/css/bootstrap.min.css';
 
 const TeacherStudents = () => {
@@ -11,44 +12,20 @@ const TeacherStudents = () => {
     const [selectedClassName, setSelectedClassName] = useState('');
     const [currentStudents, setCurrentStudents] = useState([]);
     const navigate = useNavigate();
+    const { userId, token, isAuthenticated } = useAuth();
 
     useEffect(() => {
-        checkAuthentication();
-    }, []);
-
-    const checkAuthentication = async () => {
-        try {
-            const token = localStorage.getItem('token');
-            if (!token) {
-                navigate('/login');
-                return;
-            }
-            const response = await fetch('/api/users/me', {
-                headers: {
-                    Authorization: `Bearer ${token}`
-                }
-            });
-            if (!response.ok) {
-                navigate('/login');
-                return;
-            }
-            fetchTeacherClasses();
-        } catch (err) {
-            console.error('Authentication check failed:', err);
-            navigate('/login');
+        if (!isAuthenticated) {
+            navigate('/teacher-login');
+            return;
         }
-    };
+        if (userId && token) {
+            fetchTeacherClasses();
+        }
+    }, [userId, token, isAuthenticated, navigate]);
 
     const fetchTeacherClasses = async () => {
         try {
-            const token = localStorage.getItem('token');
-            const userId = localStorage.getItem('userId');
-            if (!userId) {
-                setError('User ID not found. Please login again.');
-                setLoading(false);
-                return;
-            }
-
             const teacherResponse = await fetch(`/api/teachers/userId/${userId}`, {
                 headers: {
                     'Authorization': `Bearer ${token}`
@@ -82,7 +59,6 @@ const TeacherStudents = () => {
     const fetchClassStudents = async (classId) => {
         try {
             console.log(`Fetching students for selected class ${classId}`);
-            const token = localStorage.getItem('token');
             const response = await fetch(`/api/students/class/${classId}`, {
                 headers: {
                     Authorization: `Bearer ${token}`
@@ -97,6 +73,7 @@ const TeacherStudents = () => {
                 console.log(`Loaded ${studentsWithClass.length} students for class ${classId}`);
                 setCurrentStudents(studentsWithClass);
             } else {
+                console.error(`Error: ${response.status} ${response.statusText}`);
                 setCurrentStudents([]);
             }
         } catch (err) {

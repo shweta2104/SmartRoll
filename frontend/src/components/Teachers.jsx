@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import 'bootstrap/dist/css/bootstrap.min.css';
-
+import useAuth from '../hooks/useAuth';
 const Teachers = () => {
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState(null);
@@ -26,17 +26,41 @@ const Teachers = () => {
     const [emailSubject, setEmailSubject] = useState('');
     const [emailBody, setEmailBody] = useState('');
 
-    const userRole = localStorage.getItem('userRole') || localStorage.getItem('role') || '';
-    const isAdmin = userRole === 'ADMIN';
+
+
+    const { userRole: activeUserRole, getAuthHeaders } = useAuth();
+    const userRole = activeUserRole || '';
+    console.log('Teachers.jsx role:', userRole); // Debug
+    const [verifiedAdmin, setVerifiedAdmin] = useState(false);
+    const isAdmin = verifiedAdmin || userRole === 'ADMIN';
     const API_BASE = isAdmin ? '/api/admin/teachers' : '/api/teachers';
 
-    const getAuthHeader = () => ({ 'Authorization': `Bearer ${localStorage.getItem('token')}` });
+    const getAuthHeader = getAuthHeaders;
 
     useEffect(() => {
-        if (isAdmin) {
-            fetchTeachers();
-        }
-    }, [isAdmin]);
+        console.log('Teachers.jsx verifying admin role via backend...');
+        const verifyAdmin = async () => {
+            try {
+                const res = await fetch('/api/admin/me', {
+                    credentials: 'include',
+                    headers: getAuthHeader()
+                });
+                if (res.ok) {
+                    console.log('/api/admin/me success - verified ADMIN');
+                    setVerifiedAdmin(true);
+                    // Trigger fetchTeachers
+                    fetchTeachers();
+                } else {
+                    console.log('/api/admin/me failed:', res.status);
+                    setVerifiedAdmin(false);
+                }
+            } catch (err) {
+                console.error('Role verify error:', err);
+                setVerifiedAdmin(false);
+            }
+        };
+        verifyAdmin();
+    }, []);
 
     useEffect(() => {
         const teacherArray = Array.isArray(teachers) ? teachers : [];
@@ -220,8 +244,8 @@ const Teachers = () => {
         return (
             <div className="container-fluid py-4">
                 <div className="alert alert-warning">
-                    Access denied: admin privileges are required to manage teachers.
-                    Please log in as an admin user.
+                    Access denied: admin privileges required. LocalStorage role: '{userRole}'. Backend verify: {verifiedAdmin ? 'pass' : 'fail/pending'}.
+                    <br />Check Console. Re-login if needed.
                 </div>
             </div>
         );

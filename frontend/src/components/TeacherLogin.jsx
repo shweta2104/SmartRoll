@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { setTabItem } from '../hooks/useAuth';
 import '../css/Login.css';
 
 const TeacherLogin = () => {
@@ -25,11 +26,16 @@ const TeacherLogin = () => {
             });
             if (response.ok) {
                 const user = await response.json();
-                localStorage.setItem('userId', user.userId);
-                localStorage.setItem('userRole', user.role);
-                localStorage.setItem('role', user.role);
-                localStorage.setItem('userEmail', user.email);
-                localStorage.setItem('token', user.token);
+                // Store teacher role-specific with prefix
+                setTabItem('teacher-token', user.token);
+                setTabItem('teacher-userId', user.userId);
+                setTabItem('teacher-role', user.role);
+                setTabItem('teacher-userRole', user.role);
+                setTabItem('teacher-userEmail', user.email);
+                // Set active role
+                setTabItem('activeRole', 'TEACHER');
+                setTabItem('token', user.token);
+                setTabItem('userId', user.userId);
                 navigate('/teacher');
             } else {
                 setError('Invalid email or password');

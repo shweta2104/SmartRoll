@@ -5,6 +5,7 @@ import java.util.List;
 import java.util.Optional;
 
 import org.springframework.data.jpa.repository.JpaRepository;
+
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
@@ -22,7 +23,8 @@ public interface AttendanceRepository extends JpaRepository<Attendance, Integer>
 
     List<Attendance> findByClassId(Integer classId);
 
-    Optional<Attendance> findByStudentIdAndDateAndClassId(Integer studentId, LocalDate date, Integer classId);
+List<Attendance> findByStudentIdAndDateAndClassId(Integer studentId, LocalDate date, Integer classId);
+
 
     // For dashboard analytics
     List<Attendance> findByDateBetween(LocalDate startDate, LocalDate endDate);

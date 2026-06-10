@@ -1,0 +1,93 @@
+.student-profile-page {
+    padding: 10px 18px;
+}
+
+.student-profile-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 14px;
+}
+
+.student-profile-header .page-title {
+    font-weight: 900;
+}
+
+.student-subtitle {
+    color: rgba(0, 0, 0, 0.55);
+    margin-top: 2px;
+    font-size: 13px;
+}
+
+.profile-card {
+    border-radius: 16px;
+    padding: 18px;
+    background: rgba(255, 255, 255, 0.8);
+}
+
+.profile-top {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+}
+
+.avatar {
+    width: 54px;
+    height: 54px;
+    border-radius: 50%;
+    background: rgba(255, 193, 7, 0.25);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 900;
+    color: #856404;
+    font-size: 20px;
+}
+
+.profile-name {
+    font-weight: 900;
+    font-size: 18px;
+}
+
+.profile-email {
+    color: rgba(0, 0, 0, 0.6);
+    margin-top: 2px;
+    font-size: 13px;
+    word-break: break-word;
+}
+
+.profile-divider {
+    opacity: 0.12;
+    margin: 14px 0;
+}
+
+.profile-grid {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 14px;
+}
+
+.profile-item {
+    padding: 12px;
+    border-radius: 12px;
+    background: rgba(78, 115, 223, 0.06);
+}
+
+.profile-label {
+    font-size: 12px;
+    color: rgba(0, 0, 0, 0.55);
+    margin-bottom: 6px;
+}
+
+.profile-value {
+    font-weight: 900;
+    font-size: 14px;
+    word-break: break-word;
+}
+
+@media (max-width: 650px) {
+    .profile-grid {
+        grid-template-columns: 1fr;
+    }
+}
+

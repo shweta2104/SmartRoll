@@ -5,7 +5,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
-import java.util.stream.Collectors;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -13,11 +12,9 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.authentication.AuthenticationManager;
-
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -26,11 +23,10 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.smartroll.backend.entity.Teacher;
-
 import com.smartroll.backend.entity.Admin;
 import com.smartroll.backend.entity.Schedule;
 import com.smartroll.backend.entity.Teacher;
+
 import com.smartroll.backend.entity.User;
 import com.smartroll.backend.service.AdminService;
 import com.smartroll.backend.service.ClassEntityService;
@@ -73,6 +69,41 @@ public class AdminController {
 
     @Autowired
     private JwtUtil jwtUtil;
+
+    @PostMapping("/setup")
+    public ResponseEntity<?> setupAdmin(@RequestBody Map<String, String> req) {
+        try {
+            String email = req.get("email");
+            String password = req.get("password");
+            if (email == null || password == null) {
+                return ResponseEntity.badRequest().body("Email and password required");
+            }
+            logger.info("Admin setup for email: {}", email);
+
+            // Encode all plain passwords
+            userService.encodeExistingPasswords();
+
+            Optional<User> userOpt = userService.getUserByEmail(email);
+            User user;
+            if (userOpt.isPresent()) {
+                user = userOpt.get();
+            } else {
+                user = new User();
+                user.setEmail(email);
+                user.setUsername(email);
+                user.setPassword(password); // will be encoded in save
+                user.setRole(User.Role.ADMIN);
+            }
+            user.setPassword(password); // encode plain
+            userService.saveUser(user);
+
+            logger.info("Admin setup complete for: {}", email);
+            return ResponseEntity.ok("Admin setup complete. Use email/password to login.");
+        } catch (Exception e) {
+            logger.error("Admin setup failed: {}", e.getMessage());
+            return ResponseEntity.internalServerError().body("Setup failed: " + e.getMessage());
+        }
+    }
 
     @PostMapping("/login")
     public ResponseEntity<?> login(@RequestBody AdminLoginRequest loginRequest) {
@@ -162,11 +193,16 @@ public class AdminController {
 
     @GetMapping("/teachers")
     @PreAuthorize("hasRole('ADMIN')")
-    public ResponseEntity<List<Teacher>> getAllTeachers() {
-        logger.debug("Admin fetching all teachers");
-        List<Teacher> teachers = teacherService.getAllTeachers();
-        logger.debug("Found {} teachers for admin", teachers.size());
-        return ResponseEntity.ok(teachers);
+    public ResponseEntity<?> getAllTeachers() {
+        try {
+            logger.debug("Admin fetching all teachers");
+            List<Teacher> teachers = teacherService.getAllTeachers();
+            logger.debug("Found {} teachers for admin", teachers.size());
+            return ResponseEntity.ok(teachers);
+        } catch (Exception e) {
+            logger.error("Error fetching teachers: " + e.getMessage(), e);
+            return ResponseEntity.status(500).body("Error fetching teachers: " + e.getMessage());
+        }
     }
 
     @PostMapping("/teachers")

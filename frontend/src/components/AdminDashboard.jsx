@@ -2,7 +2,6 @@ import React from 'react';
 import { Outlet, Link, useLocation } from 'react-router-dom';
 import 'bootstrap/dist/css/bootstrap.min.css';
 import '../css/AdminDashboard.css';
-import Footer from './Footer';
 
 function AdminDashboard() {
     const location = useLocation();
@@ -74,9 +73,9 @@ function AdminDashboard() {
 
             </div>
 
-            <Footer />
         </div>
     );
 }
 
 export default AdminDashboard;
+

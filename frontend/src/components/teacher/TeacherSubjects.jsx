@@ -1,21 +1,22 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
+import useAuth from '../../hooks/useAuth';
 import 'bootstrap/dist/css/bootstrap.min.css';
 
 const TeacherSubjects = () => {
     const [assignments, setAssignments] = useState([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
+    const { userId, token } = useAuth();
 
     useEffect(() => {
-        fetchTeacherSubjects();
-    }, []);
+        if (userId && token) {
+            fetchTeacherSubjects();
+        }
+    }, [userId, token]);
 
     const fetchTeacherSubjects = async () => {
         try {
-            const userId = localStorage.getItem('userId');
-            const token = localStorage.getItem('token');
-
             if (!userId) {
                 setError('User ID not found. Please login again.');
                 setLoading(false);

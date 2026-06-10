@@ -1,0 +1,216 @@
+/* Student Attendance page styles */
+
+body {
+  font-family: 'Poppins', sans-serif;
+}
+
+.student-attendance {
+  min-height: 100vh;
+  padding: 18px 0;
+}
+
+.attendance-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 16px;
+  padding: 0 12px;
+  margin-bottom: 14px;
+}
+
+.page-title {
+  font-weight: 800;
+  color: #2c3e7a;
+  margin: 0;
+  letter-spacing: 0.2px;
+}
+
+.student-subtitle {
+  margin-top: 6px;
+  color: #6b7280;
+  font-size: 13.5px;
+}
+
+.loading-card,
+.error-card {
+  border-radius: 16px;
+  padding: 16px;
+}
+
+.attendance-summary {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 14px;
+  padding: 12px;
+}
+
+.stat-card {
+  border: 1px solid rgba(78, 115, 223, 0.18);
+  border-radius: 16px;
+  padding: 16px 16px;
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+  position: relative;
+  overflow: hidden;
+  background: linear-gradient(180deg, rgba(255,255,255,1), rgba(248,250,255,1));
+}
+
+.stat-card::before {
+  content: '';
+  position: absolute;
+  inset: -60px -60px auto auto;
+  width: 140px;
+  height: 140px;
+  border-radius: 999px;
+  background: rgba(78, 115, 223, 0.12);
+  transform: rotate(15deg);
+}
+
+.stat-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 10px 25px rgba(17, 24, 39, 0.08);
+}
+
+.stat-label {
+  color: #5b6475;
+  font-weight: 600;
+  font-size: 13.5px;
+  position: relative;
+  z-index: 1;
+}
+
+.stat-value {
+  margin-top: 10px;
+  font-weight: 900;
+  font-size: 30px;
+  line-height: 1;
+  position: relative;
+  z-index: 1;
+}
+
+.stat-neutral {
+  color: #4b5563;
+}
+
+.stat-present {
+  color: #16a34a;
+}
+
+.stat-absent {
+  color: #dc2626;
+}
+
+/* Todays status card adjustments */
+.attendance-table-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 14px;
+  padding: 18px 18px;
+  border-radius: 16px;
+}
+
+/* Recent attendance rows (Date | Subject | Status) */
+.attendance-rows-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 18px 18px;
+  border-bottom: 1px solid rgba(78, 115, 223, 0.12);
+}
+
+.attendance-rows-table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.attendance-rows-table thead th {
+  text-align: left;
+  font-size: 13px;
+  color: #6b7280;
+  font-weight: 700;
+  padding: 10px 18px;
+  border-bottom: 1px solid rgba(78, 115, 223, 0.12);
+}
+
+.attendance-rows-table tbody td {
+  padding: 12px 18px;
+  border-bottom: 1px solid rgba(78, 115, 223, 0.08);
+  font-weight: 600;
+  color: #374151;
+}
+
+.attendance-rows-table tbody tr:last-child td {
+  border-bottom: none;
+}
+
+/* Subject-wise attendance blockchain */
+.blockchain-card {
+  background: linear-gradient(180deg, rgba(255,255,255,1), rgba(248,250,255,1));
+  border: 1px solid rgba(78, 115, 223, 0.18);
+}
+
+.blockchain-header {
+  background: rgba(78, 115, 223, 0.06);
+  border-radius: 16px 16px 0 0;
+}
+
+.blockchain-list {
+  padding: 10px 18px 16px 18px;
+}
+
+.blockchain-row {
+  padding: 14px 10px;
+  border-bottom: 1px dashed rgba(78, 115, 223, 0.18);
+}
+
+.blockchain-row:last-child {
+  border-bottom: none;
+}
+
+.blockchain-row-top {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 8px;
+}
+
+.blockchain-subject {
+  font-weight: 800;
+  color: #2c3e7a;
+}
+
+.blockchain-percent {
+  font-weight: 900;
+  color: #4b5563;
+}
+
+.blockchain-progress {
+  height: 10px;
+  background: rgba(78, 115, 223, 0.12);
+  border-radius: 999px;
+  overflow: hidden;
+}
+
+.blockchain-progress-bar {
+  height: 100%;
+  border-radius: 999px;
+  background: linear-gradient(90deg, #4e73df, #1cc88a);
+  transition: width 0.9s ease;
+  box-shadow: 0 6px 14px rgba(78, 115, 223, 0.18);
+}
+
+/* Small screens */
+@media (max-width: 900px) {
+  .attendance-summary {
+    grid-template-columns: 1fr;
+  }
+
+  .attendance-header {
+    flex-direction: column;
+  }
+}
+
+
+

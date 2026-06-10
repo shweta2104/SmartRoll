@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import 'bootstrap/dist/css/bootstrap.min.css';
+import useAuth from '../hooks/useAuth';
 
 const Classes = () => {
     const [classes, setClasses] = useState([]);
@@ -23,8 +24,8 @@ const Classes = () => {
 
     const API_BASE = '/api/classes';
 
-    const token = localStorage.getItem('token');
-    const AUTH_HEADER = token ? { 'Authorization': `Bearer ${token}` } : {};
+    const { getAuthHeaders } = useAuth();
+    const AUTH_HEADER = getAuthHeaders();
 
     useEffect(() => {
         fetchClasses();

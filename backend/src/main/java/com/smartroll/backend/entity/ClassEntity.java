@@ -36,8 +36,10 @@ public class ClassEntity {
     @Column(name = "teacher_id")
     private Long teacherId;
 
+    // Map classes.teacher_id (BIGINT/Long) -> teachers.id (Long)
+    // This fixes JDBC error: operator does not exist: character varying = bigint
     @ManyToOne(fetch = FetchType.EAGER)
-    @JoinColumn(name = "teacher_id", insertable = false, updatable = false)
+    @JoinColumn(name = "teacher_id", referencedColumnName = "id", insertable = false, updatable = false)
     private Teacher teacher;
 
     @Column(name = "status", columnDefinition = "VARCHAR(20)")

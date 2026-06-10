@@ -14,7 +14,13 @@ import jakarta.persistence.Table;
 import jakarta.validation.constraints.NotNull;
 
 @Entity
-@Table(name = "attendance")
+@Table(
+        name = "attendance",
+        uniqueConstraints = @jakarta.persistence.UniqueConstraint(
+                name = "uk_attendance_student_date_class",
+                columnNames = {"student_id", "date", "class_id"}
+        )
+)
 public class Attendance {
 
     @Id

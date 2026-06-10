@@ -41,9 +41,15 @@ public class TeacherSubjectClassController {
     private TeacherService teacherService;
 
     @GetMapping
-    public ResponseEntity<List<TeacherSubjectClass>> getAllAssignments() {
-        List<TeacherSubjectClass> assignments = service.getAllAssignments();
-        return ResponseEntity.ok(assignments);
+    @PreAuthorize("hasRole('ADMIN')")
+    public ResponseEntity<?> getAllAssignments() {
+        try {
+            List<TeacherSubjectClass> assignments = service.getAllAssignments();
+            return ResponseEntity.ok(assignments);
+        } catch (Exception e) {
+            e.printStackTrace();
+            return ResponseEntity.status(500).body("Error fetching assignments: " + e.getMessage());
+        }
     }
 
     @PostMapping
@@ -112,6 +118,31 @@ public class TeacherSubjectClassController {
     @GetMapping("/class/{classId}")
     public ResponseEntity<List<TeacherSubjectClass>> getAssignmentsByClass(@PathVariable Long classId) {
         List<TeacherSubjectClass> assignments = service.getAssignmentsByClass(classId);
+        return ResponseEntity.ok(assignments);
+    }
+
+    @GetMapping("/teacher")
+    @PreAuthorize("hasRole('TEACHER')")
+    public ResponseEntity<List<TeacherSubjectClass>> getCurrentTeacherAssignments() {
+        // Get the authenticated user
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        if (authentication == null || !authentication.isAuthenticated() || authentication instanceof AnonymousAuthenticationToken) {
+            return ResponseEntity.status(403).build();
+        }
+        String email = authentication.getName();
+        Optional<User> authenticatedUser = userService.getUserByEmail(email);
+        if (authenticatedUser.isEmpty()) {
+            return ResponseEntity.status(403).build();
+        }
+        User authUser = authenticatedUser.get();
+
+        // Get the teacher record for the authenticated user
+        Optional<Teacher> teacher = teacherService.getTeacherByUserId(authUser.getUserId());
+        if (teacher.isEmpty()) {
+            return ResponseEntity.ok(List.of()); // Return empty list if no teacher record
+        }
+
+        List<TeacherSubjectClass> assignments = service.getAssignmentsByTeacher(teacher.get().getId());
         return ResponseEntity.ok(assignments);
     }
 }

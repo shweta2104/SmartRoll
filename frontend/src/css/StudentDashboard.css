@@ -1,0 +1,108 @@
+/* Student dashboard uses same vibe as teacher/admin dashboards */
+body {
+  font-family: "Poppins", sans-serif;
+  background: #f4f6fb;
+  margin: 0;
+}
+
+.student-dashboard {
+  min-height: 100vh;
+}
+
+.student-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  background: #ffffff;
+  padding: 15px 25px;
+  border-bottom: 1px solid #e5e7eb;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.05);
+  color: #333;
+}
+
+.student-header .logo {
+  font-size: 22px;
+  font-weight: 700;
+  margin: 0;
+  color: #4e73df;
+}
+
+.header-center {
+  text-align: center;
+  flex: 1;
+}
+
+.header-center h5 {
+  margin: 0;
+  font-weight: 500;
+  letter-spacing: 1px;
+  color: #555;
+}
+
+.header-right {
+  display: flex;
+  align-items: center;
+}
+
+.logout-btn {
+  background: #f1f5ff;
+  border: 1px solid #4e73df;
+  color: #4e73df;
+  padding: 6px 14px;
+  border-radius: 8px;
+  font-size: 14px;
+  transition: 0.3s;
+  text-decoration: none;
+}
+
+.logout-btn:hover {
+  background: #4e73df;
+  color: white;
+}
+
+.dashboard-body {
+  display: flex;
+}
+
+.sidebar {
+  width: 280px;
+  min-height: calc(100vh - 64px);
+  background: linear-gradient(180deg, #1e2a78, #4e73df);
+  padding-top: 20px;
+  position: sticky;
+  top: 0;
+}
+
+.sidebar .nav-link {
+  display: block;
+  color: #cfd8ff;
+  padding: 12px 20px;
+  margin: 5px 10px;
+  border-radius: 10px;
+  transition: 0.3s;
+  font-size: 15px;
+  text-decoration: none;
+}
+
+.sidebar .nav-link:hover {
+  background: rgba(255, 255, 255, 0.15);
+  color: white;
+  transform: translateX(5px);
+}
+
+.sidebar .nav-link.active {
+  background: white;
+  color: #4e73df;
+  font-weight: 600;
+}
+
+.main-content {
+  flex: 1;
+  padding: 20px 20px 120px 20px;
+}
+
+@media (max-width: 768px) {
+  .sidebar {
+    display: none;
+  }
+}
